@@ -212,7 +212,7 @@ def posthoc_shorten_answer(save_path, topic_list):
         Input: raw generations
         Output: first extract before the first period, then use gpt-4 to extract keywords
     """
-    model = OpenAIWrapper("gpt-4o")
+    model = OpenAIWrapper("gpt-4o-mini")
     with open(save_path, "r") as f:
         topic_nationality_dict = json.load(f)
     new_save_path = save_path.replace(".json", "_new_shortened.json")
