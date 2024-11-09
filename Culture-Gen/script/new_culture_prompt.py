@@ -336,6 +336,22 @@ if __name__ == "__main__":
     else:
         model_path = args.model_name
         args.model_name = model_path.split("/")[-1]
+    if args.topic_list == None:
+        args.topic_list = [
+                        # "occupation",
+                        "favorite_music",
+                        "music_instrument", 
+                        "exercise_routine", 
+                        "favorite_show_or_movie",
+                        # "collection",
+                        # "handicraft",
+                        "food",
+                        "sign_on_the_front_door",
+                        "picture_on_the_front_door",
+                        "statue_on_the_front_door",
+                        # "major",
+                        "clothing",
+                    ]
 
     if args.prompt:
         prompt_and_save(args.home_dir, args.model_name, model_path, num_samples=args.num_samples, topic_list=args.topic_list, replace=args.overwrite, probably=args.probably)
