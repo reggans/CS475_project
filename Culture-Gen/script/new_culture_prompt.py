@@ -265,11 +265,11 @@ def posthoc_shorten_answer(save_path, topic_list):
                             shortened_generations.append(generation)
                         new_topic_nationality_dict[topic][role][nationality][gender] = shortened_generations
                     # save at each nationality
-                    with open(new_save_path + f"_{topic_list}", "w") as w:
+                    with open(new_save_path, "w") as w:
                         json.dump(new_topic_nationality_dict, w, indent=4)
                 else:
                     continue
-    with open(new_save_path + f"_{topic_list}", "w") as w:
+    with open(new_save_path, "w") as w:
         json.dump(new_topic_nationality_dict, w, indent=4)
 
 def extract_keywords_from_long_value(model, topic, pronoun, value):
