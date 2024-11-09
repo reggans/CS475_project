@@ -335,7 +335,8 @@ if __name__ == "__main__":
         model_path = "mistralai/Mistral-7B-v0.1"
     else:
         model_path = args.model_name
-    
+        args.model_name = model_path.split("/")[-1]
+
     if args.prompt:
         prompt_and_save(args.home_dir, args.model_name, model_path, num_samples=args.num_samples, topic_list=args.topic_list, replace=args.overwrite, probably=args.probably)
     if args.shorten:
