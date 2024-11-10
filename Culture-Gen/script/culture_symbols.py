@@ -455,6 +455,9 @@ if __name__ == "__main__":
         model_path = "meta-llama/Llama-2-13b-hf"
     elif args.model_name == "mistral-7b":
         model_path = "mistralai/Mistral-7B-v0.1"
+    else:
+        model_path = args.model_name
+        model_name = model_path.split("/")[-1]
 
     if args.topic_list == None:
         args.topic_list = ["favorite_music", "music_instrument", "exercise_routine", "favorite_show_or_movie", "food", "picture_on_the_front_door", "statue_on_the_front_door", "clothing"]
