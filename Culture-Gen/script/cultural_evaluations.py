@@ -1230,7 +1230,8 @@ if __name__ == "__main__":
             # plot_bar_chart_with_markedness(markedness_save_path, args.model_name, "markedness", args.topic_list, secondary_ax_path=secondary_path, secondary=args.plot_secondary)
 
             # uncomment for plotting continentwise markedness
-            model_names = ["gpt-4", "llama2-13b", "mistral-7b"]
+            # model_names = ["gpt-4", "llama2-13b", "mistral-7b"]
+            model_names = ["Llama-3.2-3B-Instruct-bnb-4bit-DPO-All"]
             markedness_paths = [f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_markedness_evaluation.json" for model_name in model_names]
             plot_continentwise_markedness(args.home_dir, markedness_paths, model_names, args.topic_list)
 
