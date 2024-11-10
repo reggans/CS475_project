@@ -47,7 +47,7 @@ def extract_all_symbols_from_generation(home_dir, shortened_data_path, save_path
                 fourgrams=Counter(),
                 all=Counter()
             )
-        for b, role in enumerate(tqdm([r], desc="Assesing role")):
+        for b, role in enumerate(tqdm(r, desc="Assesing role")):
             for country, nationality in countries_nationalities_list: # target nationality
                 for gender in ["male", "female", ""]:
                     value_list = category_nationality_dict[topic][role][nationality][gender]
