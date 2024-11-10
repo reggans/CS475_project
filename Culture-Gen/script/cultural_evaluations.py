@@ -1261,7 +1261,7 @@ if __name__ == "__main__":
                 secondary_path = f"{args.home_dir}/dataset_search/nationality_topic_count.pkl"
             else:
                 secondary_path = None
-            plot_culture_symbols_generated_in_agnostic_prompts(args.home_dir, culture_agnostic_save_path, culture_symbol_path_prefix, args.model_name, secondary_ax_path=secondary_path, secondary=args.plot_secondary)
+            plot_culture_symbols_generated_in_agnostic_prompts(args.home_dir, culture_agnostic_save_path, culture_symbol_path_prefix, model_name, secondary_ax_path=secondary_path, secondary=args.plot_secondary)
         else:
             if args.model_name == "gpt-4":
                 eval_gpt4_culture_symbol_presence_in_culture_neutral_prompt(args.home_dir, shortened_data_path, culture_symbol_path_prefix, culture_agnostic_save_path, args.topic_list, gender="")
