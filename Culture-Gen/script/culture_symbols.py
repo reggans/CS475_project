@@ -512,7 +512,7 @@ if __name__ == "__main__":
                 target_country = countries[i]
                 target_nationality = nationalities[i]
                 generated_values = new_shortened_values[topic][role][target_nationality][""] # gender-neutral generations for the target nationality
-                culture_values_dict, non_culture_values_dict= choose_keywords_for_cultures(generated_values, target_nationality, target_country, nationalities, cache_dict, baseline_cache_dict)
+                culture_values_dict, non_culture_values_dict= choose_keywords_for_cultures(generated_values, target_nationality, target_country, nationalities, cache_dict, baseline_cache_dict, model_name)
                 # grouped_culture_values_dict[groups[i]][target_nationality] = culture_values_dict
                 # this part is for choosing the culture-specific values    
                 for cultural_value_key in culture_values_dict:
