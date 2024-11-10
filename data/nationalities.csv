@@ -1,5 +1,5 @@
-Country,Nationality
-Afghanistan,Afghan
-China,Chinese
-Egypt,Egyptian
-Cambodia,Cambodian
+Country,Nationality,Groups
+Afghanistan,Afghan,Central-Asia
+China,Chinese,East-Asia
+Egypt,Egyptian,African-Islamic
+Cambodia,Cambodian,Southeast-Asian
