@@ -495,7 +495,8 @@ if __name__ == "__main__":
         with open(f"{args.home_dir}/data/nationalities.csv", "r") as r:
             reader = csv.reader(r)
             next(reader)
-            countries, nationalities, groups = zip(*[(row[0], row[1], row[2]) for row in reader])
+            # countries, nationalities, groups = zip(*[(row[0], row[1], row[2]) for row in reader])
+            countries, nationalities = zip(*[(row[0], row[1]) for row in reader])
         for topic in args.topic_list:
             role = "neighbor"
             culture_nationality_mapping_dict = defaultdict(list)
@@ -506,13 +507,13 @@ if __name__ == "__main__":
             logger.info("Loaded nationalities")
 
             # culture symbols for each nationality, categorized by geographic region groups
-            grouped_culture_values_dict = defaultdict(dict)
+            # grouped_culture_values_dict = defaultdict(dict)
             for i in range(len(countries)):
                 target_country = countries[i]
                 target_nationality = nationalities[i]
                 generated_values = new_shortened_values[topic][role][target_nationality][""] # gender-neutral generations for the target nationality
                 culture_values_dict, non_culture_values_dict= choose_keywords_for_cultures(generated_values, target_nationality, target_country, nationalities, cache_dict, baseline_cache_dict)
-                grouped_culture_values_dict[groups[i]][target_nationality] = culture_values_dict
+                # grouped_culture_values_dict[groups[i]][target_nationality] = culture_values_dict
                 # this part is for choosing the culture-specific values    
                 for cultural_value_key in culture_values_dict:
                     culture_nationality_mapping_dict[cultural_value_key].append(target_nationality)
