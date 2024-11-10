@@ -13,7 +13,7 @@ import geopandas as gpd
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
 from scipy.stats import spearmanr, kendalltau
-from symbol_utils import process_generation_to_culture_symbol
+from symbol_utils import process_generation_to_symbol_candidates
 import pandas as pd
 import logging
 logger = logging.getLogger(__name__)
@@ -415,7 +415,9 @@ def eval_skewness(home_dir, new_shortened_path, cache_dict_path, culture_symbol_
                         # remove marked expressions
                         if phrase.strip() == "" or "traditional" in phrase or "typical" in phrase or "classic " in phrase or nationality in phrase or country in phrase:
                             continue
-                        phrase = process_generation_to_culture_symbol(phrase)
+                        phrase = process_generation_to_symbol_candidates(phrase)
+                        if phrase is None:
+                            continue
                         if phrase.strip() != "":
                             all_tokens = phrase.lower().split()
                             # find all unigrams
@@ -565,7 +567,9 @@ def eval_gpt4_diversity(home_dir, new_shortened_path, culture_symbol_path, save_
                         # remove marked expressions
                         if phrase.strip() == "" or "traditional" in phrase or "typical" in phrase or "classic " in phrase or nationality in phrase or country in phrase:
                             continue
-                        phrase = process_generation_to_culture_symbol(phrase)
+                        phrase = process_generation_to_symbol_candidates(phrase)
+                        if phrase is None:
+                            continue
                         # remove the last token if length <= 2
                         if phrase.strip() != "" and len(phrase.split()[-1]) <= 2:
                             phrase = " ".join(phrase.split()[:-1])
@@ -644,7 +648,9 @@ def eval_diversity(home_dir, new_shortened_path, cache_dict_path, culture_symbol
                         # remove marked expressions
                         if phrase.strip() == "" or "traditional" in phrase or "typical" in phrase or "classic " in phrase or nationality in phrase or country in phrase:
                             continue
-                        phrase = process_generation_to_culture_symbol(phrase)
+                        phrase = process_generation_to_symbol_candidates(phrase)
+                        if phrase is None:
+                            continue
                         if phrase.strip() != "":
                             all_tokens = phrase.lower().split()
                             # find all unigrams
@@ -946,7 +952,9 @@ def eval_culture_symbol_presence_in_culture_neutral_prompt(home_dir, new_shorten
                 # remove marked expressions
                 if phrase.strip() == "" or "traditional" in phrase or "typical" in phrase or "classic " in phrase:
                     continue
-                phrase = process_generation_to_culture_symbol(phrase)
+                phrase = process_generation_to_symbol_candidates(phrase)
+                if phrase is None:
+                    continue
                 if phrase.strip() != "":
                     all_tokens = phrase.lower().split()
                     # find all unigrams
@@ -1004,7 +1012,9 @@ def eval_gpt4_culture_symbol_presence_in_culture_neutral_prompt(home_dir, new_sh
                 # remove marked expressions
                 if phrase.strip() == "" or "traditional" in phrase or "typical" in phrase or "classic " in phrase:
                     continue
-                phrase = process_generation_to_culture_symbol(phrase)
+                phrase = process_generation_to_symbol_candidates(phrase)
+                if phrase is None:
+                    continue
                 if phrase.strip() != "" and len(phrase.split()[-1]) <= 2:
                     phrase = " ".join(phrase.split()[:-1])
                     # find all ngrams that are culture symbols
