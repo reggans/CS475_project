@@ -53,7 +53,7 @@ def extract_all_symbols_from_generation(home_dir, shortened_data_path, save_path
                     value_list = category_nationality_dict[topic][role][nationality][gender]
 
                     # Filter gpt-4-turbo outputs that do not follow instructions (i.e returns null answers other than "none")
-                    value_list = [value for value in value_list if value.lower != "none" and not value.endswith("text.") and " text " not in value and " any " not in value and " mention " not in value]
+                    value_list = [value for value in value_list if value.lower() != "none" and not value.endswith("text.") and " text " not in value and " any " not in value and " mention " not in value]
                     
                     for phrases in value_list:
                         # split semicolon-separated values
@@ -64,6 +64,9 @@ def extract_all_symbols_from_generation(home_dir, shortened_data_path, save_path
                             
                             # clean up phrase
                             phrase = process_generation_to_symbol_candidates(phrase)
+
+                            if phrase is None:
+                                continue
 
                             # add n-grams and entire phrase to culture_symbols_dict
                             if phrase.strip() != "":
