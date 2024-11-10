@@ -1123,7 +1123,8 @@ def plot_culture_symbols_generated_in_agnostic_prompts(home_dir, agnostic_symbol
                         counts+= 1
                 culture_symbol_counts_arr.append(counts)
 
-            x_labels.append(categories[int(group)])
+            # x_labels.append(categories[int(group)])
+            x_labels.append(group)
             y_values.append([values_arr[i] / culture_symbol_counts_arr[i] if culture_symbol_counts_arr[i] > 0 else 0 for i in range(len(values_arr))])
 
         ax1.bar(x=range(len(x_labels)), height=[np.mean(y) for y in  y_values], color="teal", alpha=0.5, label="Culture Agnostic Symbols Overlapping with Geographic Region")
