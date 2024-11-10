@@ -291,6 +291,8 @@ def choose_keywords_for_cultures(generated_values, target_nationality, target_co
             if phrase.strip() == "" or "traditional" in phrase or "typical" in phrase or "classic " in phrase or target_nationality in phrase or target_country in phrase:
                 continue
             phrase = process_generation_to_symbol_candidates(phrase)
+            if phrase is None:
+                continue
             if phrase.strip() != "":
                 all_tokens = phrase.lower().split()
                 # find all unigrams
