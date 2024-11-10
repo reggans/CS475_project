@@ -451,10 +451,13 @@ if __name__ == "__main__":
 
     if args.model_name =="gpt-4":
         model_path = "gpt-4"
+        model_name = args.model_name
     elif args.model_name == "llama2-13b":
         model_path = "meta-llama/Llama-2-13b-hf"
+        model_name = args.model_name
     elif args.model_name == "mistral-7b":
         model_path = "mistralai/Mistral-7B-v0.1"
+        model_name = args.model_name
     else:
         model_path = args.model_name
         model_name = model_path.split("/")[-1]
@@ -463,10 +466,10 @@ if __name__ == "__main__":
         args.topic_list = ["favorite_music", "music_instrument", "exercise_routine", "favorite_show_or_movie", "food", "picture_on_the_front_door", "statue_on_the_front_door", "clothing"]
 
     if args.extract:
-        shortened_data_path = f"{args.home_dir}/probable_data/categories_nationality_100_{args.model_name}_prob={args.probably}_new_shortened.json"
-        save_path = f"{args.home_dir}/probable_data/categories_nationality_100_{args.model_name}_prob={args.probably}_all_symbols.json"
+        shortened_data_path = f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_new_shortened.json"
+        save_path = f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_all_symbols.json"
         if args.model_name == "gpt-4":
-            value_to_culture_mapping_path_prefix = f"{args.home_dir}/probable_data/categories_nationality_100_{args.model_name}_prob={args.probably}_value_to_culture_mapping.json"
+            value_to_culture_mapping_path_prefix = f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_value_to_culture_mapping.json"
             extract_gpt4_culture_symbols_and_map_to_nationality(args.home_dir, shortened_data_path=shortened_data_path, save_path=save_path.replace(".json", "_prefixed.json"), value_to_culture_mapping_path_prefix=value_to_culture_mapping_path_prefix, topic_list=args.topic_list)
         else:
             extract_all_symbols_from_generation(args.home_dir, shortened_data_path=shortened_data_path, save_path=save_path, topic_list=args.topic_list)
@@ -478,14 +481,14 @@ if __name__ == "__main__":
             nationalities = [row[1] for row in reader]
         logger.info("Loaded nationalities")
 
-        all_symbols_path = f"{args.home_dir}/probable_data/categories_nationality_100_{args.model_name}_prob={args.probably}_all_symbols.json"
+        all_symbols_path = f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_all_symbols.json"
         precalculate_culture_symbol_nationality_prob(all_symbols_path, model_path, nationalities, role="neighbor", topic_list=args.topic_list, baseline=args.baseline)
     
     if args.choose:
         # path to save number of culture symbols for each culture that overlaps with culture agnostic generations
-        culture_agnostic_save_path = f"{args.home_dir}/probable_data/categories_nationality_100_{args.model_name}_prob={args.probably}_culture_agnostic_overlap_evaluation.json"
+        culture_agnostic_save_path = f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_culture_agnostic_overlap_evaluation.json"
         # path to shortened values
-        new_shortened_values = json.load(open(f"{args.home_dir}/probable_data/categories_nationality_100_{args.model_name}_prob={args.probably}_new_shortened.json", "r"))
+        new_shortened_values = json.load(open(f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_new_shortened.json", "r"))
         with open(f"{args.home_dir}/data/nationalities.csv", "r") as r:
             reader = csv.reader(r)
             next(reader)
@@ -494,9 +497,9 @@ if __name__ == "__main__":
             role = "neighbor"
             culture_nationality_mapping_dict = defaultdict(list)
             # topic-wise probability cache path
-            cache_dict = pkl.load(open(f"{args.home_dir}/probable_data/categories_nationality_100_{args.model_name}_prob={args.probably}_all_symbols_probability_cache_{topic}.pkl", "rb"))
+            cache_dict = pkl.load(open(f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_all_symbols_probability_cache_{topic}.pkl", "rb"))
             # baseline cache path, topic-wise dict
-            baseline_cache_dict = pkl.load(open(f"{args.home_dir}/probable_data/categories_nationality_100_{args.model_name}_prob={args.probably}_all_symbols_probability_cache_topical_baseline.pkl", "rb"))[topic]
+            baseline_cache_dict = pkl.load(open(f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_all_symbols_probability_cache_topical_baseline.pkl", "rb"))[topic]
             logger.info("Loaded nationalities")
 
             # culture symbols for each nationality, categorized by geographic region groups
@@ -511,13 +514,13 @@ if __name__ == "__main__":
                 for cultural_value_key in culture_values_dict:
                     culture_nationality_mapping_dict[cultural_value_key].append(target_nationality)
             # save to file
-            with open(f"{args.home_dir}/probable_data/categories_nationality_100_{args.model_name}_prob={args.probably}_value_to_culture_mapping_{topic}.json", "w") as w:
+            with open(f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_value_to_culture_mapping_{topic}.json", "w") as w:
                 json.dump(culture_nationality_mapping_dict, w, indent=4)
             # this part is for plotting percentage of generated culture symbols that overlap with culture agnostic generation
-            # plot_culture_symbols_generated_in_agnostic_prompts(args.home_dir, grouped_culture_values_dict, agnostic_symbol_path=culture_agnostic_save_path, model_name=args.model_name)
+            # plot_culture_symbols_generated_in_agnostic_prompts(args.home_dir, grouped_culture_values_dict, agnostic_symbol_path=culture_agnostic_save_path, model_name=model_name)
             
             # this part is for plotting box plot of number of culture symbols assigned to each geographic region
                 # culture_non_culture_values_dicts[groups[i]][target_nationality] = {"values": culture_values_dict, "non_values": non_culture_values_dict}
-            # plot_accepted_and_non_accepted_values(culture_non_culture_values_dicts, topic, args.model_name, secondary_ax_path=f"{args.home_dir}/dataset_search/nationality_topic_count.pkl")
+            # plot_accepted_and_non_accepted_values(culture_non_culture_values_dicts, topic, model_name, secondary_ax_path=f"{args.home_dir}/dataset_search/nationality_topic_count.pkl")
                 
             
