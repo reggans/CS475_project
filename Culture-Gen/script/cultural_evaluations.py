@@ -335,7 +335,7 @@ def plot_continentwise_markedness(home_dir, eval_paths, model_names, topic_list,
             del nationality_counter[""]
             for country, nationality, grouping in countries_nationalities_group_list:
                 markedness = sum(nationality_counter[nationality][gender].values())
-                topic_model_average_dict[model_name][topic][categories[int(grouping)]].append(markedness)
+                topic_model_average_dict[model_name][topic][grouping].append(markedness)
 
     # calculate the average markedness for each continent for each topic
     continent_model_average_dict = {}
