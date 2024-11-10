@@ -1159,37 +1159,43 @@ if __name__ == "__main__":
 
     if args.model_name =="gpt-4":
         model_path = "gpt-4"
+        model_name = args.model_name
     elif args.model_name == "llama2-13b":
         model_path = "meta-llama/Llama-2-13b-hf"
+        model_name = args.model_name
     elif args.model_name == "mistral-7b":
         model_path = "mistralai/Mistral-7B-v0.1"
+        model_name = args.model_name
+    else:
+        model_path = args.model_name
+        model_name = args.model_name.split("/")[-1]
 
     if args.topic_list == None:
         args.topic_list = ["favorite_music", "music_instrument", "exercise_routine", "favorite_show_or_movie", "food", "picture_on_the_front_door", "statue_on_the_front_door", "clothing"]
     
-    original_data_path = f"{args.home_dir}/probable_data/categories_nationality_100_{args.model_name}_prob={args.probably}.json"
-    shortened_data_path = f"{args.home_dir}/probable_data/categories_nationality_100_{args.model_name}_prob={args.probably}_new_shortened.json"
-    cache_dict_path_prefix = f"{args.home_dir}/probable_data/categories_nationality_100_{args.model_name}_prob={args.probably}_all_symbols_probability_cache.pkl"
-    culture_symbol_path_prefix = f"{args.home_dir}/probable_data/categories_nationality_100_{args.model_name}_prob={args.probably}_value_to_culture_mapping.json"
+    original_data_path = f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}.json"
+    shortened_data_path = f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_new_shortened.json"
+    cache_dict_path_prefix = f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_all_symbols_probability_cache.pkl"
+    culture_symbol_path_prefix = f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_value_to_culture_mapping.json"
 
     if args.eval == "diversity":
-        diversity_save_path = f"{args.home_dir}/probable_data/categories_nationality_100_{args.model_name}_prob={args.probably}_diversity_evaluation_count_filtered.json"
+        diversity_save_path = f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_diversity_evaluation_count_filtered.json"
         if args.plot:
-            # plot_world_map_with_diversity(diversity_save_path, args.model_name, args.topic_list)
-            # plot_world_map_with_diversity(diversity_save_path, args.model_name, args.topic_list, gender="male")
-            # plot_world_map_with_diversity(diversity_save_path, args.model_name, args.topic_list, gender="female")
+            # plot_world_map_with_diversity(diversity_save_path, model_name, args.topic_list)
+            # plot_world_map_with_diversity(diversity_save_path, model_name, args.topic_list, gender="male")
+            # plot_world_map_with_diversity(diversity_save_path, model_name, args.topic_list, gender="female")
             if args.plot_secondary == "nationality":
                 secondary_path = f"{args.home_dir}/dataset_search/nationality_count_documents.pkl"
             elif args.plot_secondary == "topic":
                 secondary_path = f"{args.home_dir}/dataset_search/nationality_topic_count.pkl"
             else:
                 secondary_path = None
-            # plot_bar_chart_with_diversity(args.home_dir,diversity_save_path, args.model_name, "simpson", args.topic_list, secondary_ax_path=secondary_path, secondary=args.plot_secondary)
-            # plot_bar_chart_with_diversity(args.home_dir,diversity_save_path, args.model_name, "simpson", args.topic_list, gender="male", secondary_ax_path=secondary_path, secondary=args.plot_secondary)
-            # plot_bar_chart_with_diversity(args.home_dir,diversity_save_path, args.model_name, "simpson", args.topic_list, gender="female", secondary_ax_path=secondary_path, secondary=args.plot_secondary)
-            plot_bar_chart_with_diversity(args.home_dir,diversity_save_path, args.model_name, "count", args.topic_list, secondary_ax_path=secondary_path, secondary=args.plot_secondary)
-            # plot_bar_chart_with_diversity(args.home_dir,diversity_save_path, args.model_name, "count", args.topic_list, gender="male", secondary_ax_path=secondary_path, secondary=args.plot_secondary)
-            # plot_bar_chart_with_diversity(args.home_dir,diversity_save_path, args.model_name, "count", args.topic_list, gender="female", secondary_ax_path=secondary_path, secondary=args.plot_secondary)
+            # plot_bar_chart_with_diversity(args.home_dir,diversity_save_path, model_name, "simpson", args.topic_list, secondary_ax_path=secondary_path, secondary=args.plot_secondary)
+            # plot_bar_chart_with_diversity(args.home_dir,diversity_save_path, model_name, "simpson", args.topic_list, gender="male", secondary_ax_path=secondary_path, secondary=args.plot_secondary)
+            # plot_bar_chart_with_diversity(args.home_dir,diversity_save_path, model_name, "simpson", args.topic_list, gender="female", secondary_ax_path=secondary_path, secondary=args.plot_secondary)
+            plot_bar_chart_with_diversity(args.home_dir,diversity_save_path, model_name, "count", args.topic_list, secondary_ax_path=secondary_path, secondary=args.plot_secondary)
+            # plot_bar_chart_with_diversity(args.home_dir,diversity_save_path, model_name, "count", args.topic_list, gender="male", secondary_ax_path=secondary_path, secondary=args.plot_secondary)
+            # plot_bar_chart_with_diversity(args.home_dir,diversity_save_path, model_name, "count", args.topic_list, gender="female", secondary_ax_path=secondary_path, secondary=args.plot_secondary)
         else:
             if args.model_name == "gpt-4":
                 symbols_path = f"{args.home_dir}/probable_data/categories_nationality_100_gpt-4_prob=True_all_symbols_prefixed.json"
@@ -1202,23 +1208,23 @@ if __name__ == "__main__":
                 eval_diversity(args.home_dir, shortened_data_path, cache_dict_path_prefix, culture_symbol_path_prefix, diversity_save_path, args.topic_list, gender="female")
 
     elif args.eval == "skewness":
-        skewness_save_path = f"{args.home_dir}/probable_data/categories_nationality_100_{args.model_name}_prob={args.probably}_skewness_evaluation_count.json"
+        skewness_save_path = f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_skewness_evaluation_count.json"
         if args.plot:
-            plot_world_map_with_skewness(skewness_save_path, args.model_name, args.topic_list)
-            plot_world_map_with_skewness(skewness_save_path, args.model_name, args.topic_list, gender="male")
-            plot_world_map_with_skewness(skewness_save_path, args.model_name, args.topic_list, gender="female")
+            plot_world_map_with_skewness(skewness_save_path, model_name, args.topic_list)
+            plot_world_map_with_skewness(skewness_save_path, model_name, args.topic_list, gender="male")
+            plot_world_map_with_skewness(skewness_save_path, model_name, args.topic_list, gender="female")
         else:
             eval_skewness(args.home_dir, shortened_data_path, cache_dict_path_prefix, culture_symbol_path_prefix, skewness_save_path, args.topic_list)
             eval_skewness(args.home_dir, shortened_data_path, cache_dict_path_prefix, culture_symbol_path_prefix, skewness_save_path, args.topic_list, gender="male")
             eval_skewness(args.home_dir, shortened_data_path, cache_dict_path_prefix, culture_symbol_path_prefix, skewness_save_path, args.topic_list, gender="female")
     
     elif args.eval == "markedness":
-        markedness_save_path = f"{args.home_dir}/probable_data/categories_nationality_100_{args.model_name}_prob={args.probably}_markedness_evaluation.json"
+        markedness_save_path = f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_markedness_evaluation.json"
         if args.plot:
             # uncomment for plotting world map
-            # plot_world_map_with_markedness(markedness_save_path, args.model_name, args.topic_list, aggregate=True)
-            # plot_world_map_with_markedness(markedness_save_path, args.model_name, args.topic_list, gender="male")
-            # plot_world_map_with_markedness(markedness_save_path, args.model_name, args.topic_list, gender="female")
+            # plot_world_map_with_markedness(markedness_save_path, model_name, args.topic_list, aggregate=True)
+            # plot_world_map_with_markedness(markedness_save_path, model_name, args.topic_list, gender="male")
+            # plot_world_map_with_markedness(markedness_save_path, model_name, args.topic_list, gender="female")
             # if args.plot_secondary == "nationality":
             #     secondary_path = f"{args.home_dir}/dataset_search/nationality_count_documents.pkl"
             # elif args.plot_secondary == "topic":
@@ -1227,7 +1233,7 @@ if __name__ == "__main__":
             #     secondary_path = None
 
             # uncomment for plotting bar chart
-            # plot_bar_chart_with_markedness(markedness_save_path, args.model_name, "markedness", args.topic_list, secondary_ax_path=secondary_path, secondary=args.plot_secondary)
+            # plot_bar_chart_with_markedness(markedness_save_path, model_name, "markedness", args.topic_list, secondary_ax_path=secondary_path, secondary=args.plot_secondary)
 
             # uncomment for plotting continentwise markedness
             # model_names = ["gpt-4", "llama2-13b", "mistral-7b"]
@@ -1242,8 +1248,8 @@ if __name__ == "__main__":
             eval_markedness(args.home_dir, original_data_path, markedness_save_path, args.topic_list)
     
     elif args.eval == "culture_agnostic":
-        culture_agnostic_save_path = f"{args.home_dir}/probable_data/categories_nationality_100_{args.model_name}_prob={args.probably}_culture_agnostic_overlap_evaluation.json"
-        filtered_culture_symbol_path = f"{args.home_dir}/probable_data/categories_nationality_100_{args.model_name}_prob={args.probably}_value_to_culture_mapping_filtered.json"
+        culture_agnostic_save_path = f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_culture_agnostic_overlap_evaluation.json"
+        filtered_culture_symbol_path = f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_value_to_culture_mapping_filtered.json"
 
         if args.filter:
             remove_culture_symbols_generated_in_agnostic_prompts(culture_symbol_path_prefix, culture_agnostic_save_path, filtered_culture_symbol_path)
@@ -1263,9 +1269,9 @@ if __name__ == "__main__":
     
     elif args.eval == "correlation":
         # uncomment for diversity correlation with dataset topic frequency
-        diversity_save_path = f"{args.home_dir}/probable_data/categories_nationality_100_{args.model_name}_prob={args.probably}_diversity_evaluation_count_filtered.json"
+        diversity_save_path = f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_diversity_evaluation_count_filtered.json"
         calculate_diversity_correlation_with_training_data(diversity_save_path, eval_type="count", topic_list=None, gender="")
 
         # uncomment for markedness correlation with dataset topic frequency
-        markedness_save_path = f"{args.home_dir}/probable_data/categories_nationality_100_{args.model_name}_prob={args.probably}_markedness_evaluation.json"
+        markedness_save_path = f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_markedness_evaluation.json"
         calculate_markedness_correlation_with_training_data(markedness_save_path, eval_type="vocab_mark", topic_list=None, gender="")
