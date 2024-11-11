@@ -11,7 +11,7 @@ class OpenAIWrapper:
         self.model_path = path
         openai.api_key = os.environ.get("OPENAI_API_KEY")
     
-    @backoff.on_exception(backoff.expo, (openai.error.APIError, openai.error.RateLimitError, openai.error.ServiceUnavailableError, openai.error.APIConnectionError, openai.error.Timeout))
+    # @backoff.on_exception(backoff.expo, (openai.error.APIError, openai.error.RateLimitError, openai.error.ServiceUnavailableError, openai.error.APIConnectionError, openai.error.Timeout))
     def generate(self, prompt=None, temperature=1, max_tokens=512, top_p=1, n=1, get_logprobs=False):
         texts = []
         yes_probs = None
