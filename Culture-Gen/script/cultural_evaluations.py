@@ -362,6 +362,7 @@ def plot_continentwise_markedness(home_dir, eval_paths, model_names, topic_list,
         plt.ylim(0, 100)  # Set y-axis limit from 0 to 100
         plt.xlabel(None)
         plt.ylabel('Average Marked Generations')
+        plt.title(f"Average Marked Generations by Continent for {model_name}")
         if model_name == "gpt-4":
             plt.legend(title="Geographic Regions", loc='upper right', bbox_to_anchor=(1.1, 1))
         else:
@@ -1133,6 +1134,8 @@ def plot_culture_symbols_generated_in_agnostic_prompts(home_dir, agnostic_symbol
         ax1.set_ylim(-0.02,1)
         
         ax1.legend(loc='best')
+
+        ax1.set_title(f"Culture Symbols in Culture Agnostic Prompts for {model_name}, {topic}, {gender}")
 
         # Remove the grid
         ax1.grid(False)
