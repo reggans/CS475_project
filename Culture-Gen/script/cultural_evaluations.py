@@ -627,8 +627,8 @@ def eval_diversity(home_dir, new_shortened_path, cache_dict_path, culture_symbol
     for topic in topic_list:
         topic_cache_dict_path = cache_dict_path.replace(".pkl", f"_{topic}.pkl")
         topic_culture_symbol_path = culture_symbol_path.replace(".json", f"_{topic}.json")
-        if not os.path.exists(topic_cache_dict_path) or not os.path.exists(topic_culture_symbol_path):
-            continue
+        # if not os.path.exists(topic_cache_dict_path) or not os.path.exists(topic_culture_symbol_path):
+        #     continue
         with open(topic_cache_dict_path, "rb") as r:
             cache_dict = pkl.load(r)
         with open(topic_culture_symbol_path, "r") as r:
