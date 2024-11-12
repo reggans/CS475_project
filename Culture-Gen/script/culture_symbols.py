@@ -335,9 +335,6 @@ def choose_keywords_for_cultures(generated_values, target_nationality, target_co
             continue
         
         non_culture_values_dict[value] = probs[target_index][1]
-    
-    print(f"Culture values: {culture_values_dict}")
-    print(f"Non-culture values: {non_culture_values_dict}")
 
     return culture_values_dict, non_culture_values_dict
 
@@ -521,6 +518,7 @@ if __name__ == "__main__":
                 # this part is for choosing the culture-specific values    
                 for cultural_value_key in culture_values_dict:
                     culture_nationality_mapping_dict[cultural_value_key].append(target_nationality)
+                print(cultural_value_key.keys())
             # save to file
             with open(f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_value_to_culture_mapping_{topic}.json", "w") as w:
                 json.dump(culture_nationality_mapping_dict, w, indent=4)
