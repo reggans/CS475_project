@@ -627,57 +627,57 @@ def eval_diversity(home_dir, new_shortened_path, cache_dict_path, culture_symbol
     for topic in topic_list:
         topic_cache_dict_path = cache_dict_path.replace(".pkl", f"_{topic}.pkl")
         topic_culture_symbol_path = culture_symbol_path.replace(".json", f"_{topic}.json")
-        # if not os.path.exists(topic_cache_dict_path) or not os.path.exists(topic_culture_symbol_path):
-        #     continue
+        if not os.path.exists(topic_cache_dict_path) or not os.path.exists(topic_culture_symbol_path):
+            continue
         with open(topic_cache_dict_path, "rb") as r:
             cache_dict = pkl.load(r)
         with open(topic_culture_symbol_path, "r") as r:
             culture_symbol_dict = json.load(r)
-        if topic not in symbol_counter_dict:
-            symbol_counter_dict[topic] = {}
-        if gender not in symbol_counter_dict[topic]:
-            symbol_counter_dict[topic][gender] = {}
-            for nationality_index, (country, nationality) in enumerate(countries_nationalities_list):
-                generated_values = category_nationality_dict[topic][role][nationality][gender]
-                culture_symbol_counter = Counter()
-                for i, value in enumerate(tqdm(generated_values, desc="calculating culture symbol strength scores for each generation")):
-                    # process the shortened generations the same way as extracting symbols
-                    if value.lower() == "none" or "text." in value or " text " in value or " any " in value or " mention " in value:
+        # if topic not in symbol_counter_dict:
+        symbol_counter_dict[topic] = {}
+        # if gender not in symbol_counter_dict[topic]:
+        symbol_counter_dict[topic][gender] = {}
+        for nationality_index, (country, nationality) in enumerate(countries_nationalities_list):
+            generated_values = category_nationality_dict[topic][role][nationality][gender]
+            culture_symbol_counter = Counter()
+            for i, value in enumerate(tqdm(generated_values, desc="calculating culture symbol strength scores for each generation")):
+                # process the shortened generations the same way as extracting symbols
+                if value.lower() == "none" or "text." in value or " text " in value or " any " in value or " mention " in value:
+                    continue
+                all_values = []
+                for phrase in value.split(";"):
+                    # remove marked expressions
+                    if phrase.strip() == "" or "traditional" in phrase or "typical" in phrase or "classic " in phrase or nationality in phrase or country in phrase:
                         continue
-                    all_values = []
-                    for phrase in value.split(";"):
-                        # remove marked expressions
-                        if phrase.strip() == "" or "traditional" in phrase or "typical" in phrase or "classic " in phrase or nationality in phrase or country in phrase:
-                            continue
-                        phrase = process_generation_to_symbol_candidates(phrase)
-                        if phrase is None:
-                            continue
-                        if phrase.strip() != "":
-                            all_tokens = phrase.lower().split()
-                            # find all unigrams
-                            unigrams = [''.join(filter(lambda x: x.isalpha() or x.isdigit() or x.isspace(), token)) for token in all_tokens]
-                            bigrams = [''.join(filter(lambda x: x.isalpha() or x.isdigit() or x.isspace(), " ".join(all_tokens[i:i+2]))) for i in range(len(all_tokens)-1)]
-                            trigrams = [''.join(filter(lambda x: x.isalpha() or x.isdigit() or x.isspace(), " ".join(all_tokens[i:i+3]))) for i in range(len(all_tokens)-2)]
-                            fourgrams = [''.join(filter(lambda x: x.isalpha() or x.isdigit() or x.isspace(), " ".join(all_tokens[i:i+4]))) for i in range(len(all_tokens)-3)]
-                            # rank the probability of each ngram
-                            ngrams = unigrams + bigrams + trigrams + fourgrams
-                            probabilities = [cache_dict[ngram][nationality_index] for ngram in ngrams]
-                            tups = list(zip(ngrams, probabilities))
-                            tups = sorted(tups, key=lambda x: x[1], reverse=True)
-                        else:
-                            continue
-                        if tups is not None:
-                            phrase_representative_value = tups[0][0]
-                            all_values.append(phrase_representative_value) # TODO: change into appending all tups and select the one with highest culture_score later
-                    # for each value, add to counter
-                    for phrase_representative_value in all_values:
-                        if phrase_representative_value in topic_to_keywords_mapping[topic]:
-                            continue
-                        if phrase_representative_value in culture_symbol_dict and nationality in culture_symbol_dict[phrase_representative_value]:
-                            culture_symbol_counter[phrase_representative_value] += 1
-                            # calculate the simpson index
-                simpson_iod_value = simpson_iod(culture_symbol_counter)
-                symbol_counter_dict[topic][gender][nationality] = (simpson_iod_value, len(culture_symbol_counter))
+                    phrase = process_generation_to_symbol_candidates(phrase)
+                    if phrase is None:
+                        continue
+                    if phrase.strip() != "":
+                        all_tokens = phrase.lower().split()
+                        # find all unigrams
+                        unigrams = [''.join(filter(lambda x: x.isalpha() or x.isdigit() or x.isspace(), token)) for token in all_tokens]
+                        bigrams = [''.join(filter(lambda x: x.isalpha() or x.isdigit() or x.isspace(), " ".join(all_tokens[i:i+2]))) for i in range(len(all_tokens)-1)]
+                        trigrams = [''.join(filter(lambda x: x.isalpha() or x.isdigit() or x.isspace(), " ".join(all_tokens[i:i+3]))) for i in range(len(all_tokens)-2)]
+                        fourgrams = [''.join(filter(lambda x: x.isalpha() or x.isdigit() or x.isspace(), " ".join(all_tokens[i:i+4]))) for i in range(len(all_tokens)-3)]
+                        # rank the probability of each ngram
+                        ngrams = unigrams + bigrams + trigrams + fourgrams
+                        probabilities = [cache_dict[ngram][nationality_index] for ngram in ngrams]
+                        tups = list(zip(ngrams, probabilities))
+                        tups = sorted(tups, key=lambda x: x[1], reverse=True)
+                    else:
+                        continue
+                    if tups is not None:
+                        phrase_representative_value = tups[0][0]
+                        all_values.append(phrase_representative_value) # TODO: change into appending all tups and select the one with highest culture_score later
+                # for each value, add to counter
+                for phrase_representative_value in all_values:
+                    if phrase_representative_value in topic_to_keywords_mapping[topic]:
+                        continue
+                    if phrase_representative_value in culture_symbol_dict and nationality in culture_symbol_dict[phrase_representative_value]:
+                        culture_symbol_counter[phrase_representative_value] += 1
+                        # calculate the simpson index
+            simpson_iod_value = simpson_iod(culture_symbol_counter)
+            symbol_counter_dict[topic][gender][nationality] = (simpson_iod_value, len(culture_symbol_counter))
     with open(save_path, "w") as w:
         json.dump(symbol_counter_dict, w, indent=4)
 
