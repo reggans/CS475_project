@@ -335,6 +335,9 @@ def choose_keywords_for_cultures(generated_values, target_nationality, target_co
             continue
         
         non_culture_values_dict[value] = probs[target_index][1]
+    
+    print(f"Culture values: {culture_values_dict}")
+    print(f"Non-culture values: {non_culture_values_dict}")
 
     return culture_values_dict, non_culture_values_dict
 

@@ -662,9 +662,9 @@ def eval_diversity(home_dir, new_shortened_path, cache_dict_path, culture_symbol
                         # rank the probability of each ngram
                         ngrams = unigrams + bigrams + trigrams + fourgrams
                         probabilities = [cache_dict[ngram][nationality_index] for ngram in ngrams]
-                        print(probabilities)
                         tups = list(zip(ngrams, probabilities))
                         tups = sorted(tups, key=lambda x: x[1], reverse=True)
+                        print(tups)
                     else:
                         continue
                     if tups is not None:
