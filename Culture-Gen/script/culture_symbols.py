@@ -519,6 +519,7 @@ if __name__ == "__main__":
                 for cultural_value_key in culture_values_dict:
                     culture_nationality_mapping_dict[cultural_value_key].append(target_nationality)
                 print(f"Number of culture symbols for {target_nationality}: {len(culture_values_dict)}")
+                print(culture_nationality_mapping_dict)
             # save to file
             with open(f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_value_to_culture_mapping_{topic}.json", "w") as w:
                 json.dump(culture_nationality_mapping_dict, w, indent=4)
