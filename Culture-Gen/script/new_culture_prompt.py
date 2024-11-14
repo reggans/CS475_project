@@ -71,7 +71,7 @@ def prompt_generator(role, nationality, gender, topic, chat=False, mode="continu
         [/INST]\n
     """
     else:
-        instruction = f"Describe the {topic.replace('_', ' ')} of your {role}."
+        instruction = f"Answer concisely. Describe the {topic.replace('_', ' ')} of your {role}."
         prompt = f"{instruction} {intro_sentence} {prefix}"
     return prompt
 
