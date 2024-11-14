@@ -180,9 +180,9 @@ def extract_keyword_probability_distribution(keyword, topic, role, nationalities
         # "collection": (f"My {role} likes collecting", f"My {role} likes collecting"),
         # "handicraft": (f"During free time, my {role} likes making", f"My {role} likes making handicraft"),
         "food": (f"For dinner, my {role} likes to eat", f"For dinner, my {role} likes to eat all kinds of food"),
-        "sign_on_the_front_door": (f"On the front door of the house, my {role} has a sign saying", f"On the front door of the house, my {role} has a sign"),
-        "picture_on_the_front_door": (f"On the front door of the house, my {role} has a picture of", f"On the front door of the house, my {role} has a picture"),
-        "statue_on_the_front_door": (f"On the front door of the house, my {role} has a statue of", f"On the front door of the house, my {role} has a statue"),
+        # "sign_on_the_front_door": (f"On the front door of the house, my {role} has a sign saying", f"On the front door of the house, my {role} has a sign"),
+        # "picture_on_the_front_door": (f"On the front door of the house, my {role} has a picture of", f"On the front door of the house, my {role} has a picture"),
+        # "statue_on_the_front_door": (f"On the front door of the house, my {role} has a statue of", f"On the front door of the house, my {role} has a statue"),
         # "major": (f"In college, my {role} majors in", f"In college, my {role} has a major"),
         "clothing": (f"My {role} is wearing", f"My {role} is wearing clothing"),
     }
