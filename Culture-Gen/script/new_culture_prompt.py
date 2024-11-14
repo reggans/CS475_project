@@ -99,6 +99,7 @@ def prompting_pipeline(
         chat=False,
         mode="continuation",
         probably=False,
+        rewrite=False,
         ):
     """
         Prompts model from `model_path` with prompts including `nationalities` and `topics` and save the results to `save_path`.
@@ -111,7 +112,7 @@ def prompting_pipeline(
         model = AutoModelForCausalLM.from_pretrained(model_path, device_map="auto", do_sample=True)
 
     nationalities.append("") # neutral baseline
-    if os.path.exists(save_path):
+    if os.path.exists(save_path) and not rewrite:
         with open(save_path, "r") as f:
             topic_nationality_dict = json.load(f)
     else:
@@ -170,6 +171,7 @@ def prompt_and_save(home_dir, model_name, model_path,
                     topic_list=None,
                     replace=False,
                     probably=True,
+                    rewrite=False,
                     ):
     """
         Prompts model from `model_path` and regulate how many samples to obtain using `num_samples`.
@@ -202,12 +204,12 @@ def prompt_and_save(home_dir, model_name, model_path,
     # mode = "mask" if "chat" in model_name else "continuation"
     mode = "continuation"
     
-    topic_nationality_dict = prompting_pipeline(nationalities, f"{home_dir}/probable_data/categories_nationality_{num_samples}_{model_name}_prob={probably}.json", model_path=model_path, n_sample=num_samples, topic_list=topic_list, replace=replace, chat=chat, mode=mode, probably=probably)
+    topic_nationality_dict = prompting_pipeline(nationalities, f"{home_dir}/probable_data/categories_nationality_{num_samples}_{model_name}_prob={probably}.json", model_path=model_path, n_sample=num_samples, topic_list=topic_list, replace=replace, chat=chat, mode=mode, probably=probably, rewrite=rewrite)
     # topic_nationality_dict = prompt_with_no_nationality(f"../new_data/categories_nationality_{num_samples}_{model_name}_new_baseline.json", model_path, num_samples)
     with open(f"{home_dir}/probable_data/categories_nationality_{num_samples}_{model_name}_prob={probably}.json", "w") as w:
         json.dump(topic_nationality_dict, w, indent=4)
 
-def posthoc_shorten_answer(save_path, topic_list):
+def posthoc_shorten_answer(save_path, topic_list, rewrite=False):
     """
         Input: raw generations
         Output: first extract before the first period, then use gpt-4 to extract keywords
@@ -218,7 +220,7 @@ def posthoc_shorten_answer(save_path, topic_list):
     new_save_path = save_path.replace(".json", "_new_shortened.json")
     
     for a, topic in enumerate(tqdm(topic_list, desc="shortening topics")):
-        if os.path.exists(new_save_path):
+        if os.path.exists(new_save_path) and not rewrite:
             with open(new_save_path, "r") as f:
                 new_topic_nationality_dict = json.load(f)
         else:
@@ -323,6 +325,7 @@ if __name__ == "__main__":
     parser.add_argument("--probably", action="store_true")
     parser.add_argument("--shorten", action="store_true")
     parser.add_argument("--topic_list", nargs="+", default=None, help="List of topics to prompt")
+    parser.add_argument("--rewrite", action="store_true")
     
     args = parser.parse_args()
     logger.info(args)
@@ -354,6 +357,6 @@ if __name__ == "__main__":
                     ]
 
     if args.prompt:
-        prompt_and_save(args.home_dir, args.model_name, model_path, num_samples=args.num_samples, topic_list=args.topic_list, replace=args.overwrite, probably=args.probably)
+        prompt_and_save(args.home_dir, args.model_name, model_path, num_samples=args.num_samples, topic_list=args.topic_list, replace=args.overwrite, probably=args.probably, rewrite=args.rewrite)
     if args.shorten:
-        posthoc_shorten_answer(f"{args.home_dir}/probable_data/categories_nationality_{args.num_samples}_{args.model_name}_prob={args.probably}.json", args.topic_list)
+        posthoc_shorten_answer(f"{args.home_dir}/probable_data/categories_nationality_{args.num_samples}_{args.model_name}_prob={args.probably}.json", args.topic_list, rewrite=args.rewrite)
