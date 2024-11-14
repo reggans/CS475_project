@@ -38,7 +38,12 @@ def simpson_iod(counter):
     return 1 - sum(p(n, N)**2 for n in counter.values() if n != 0)
 
 
-def eval_markedness(home_dir, original_generation_path, save_path, topic_list=None, role="neighbor"):
+def eval_markedness(home_dir, 
+                    original_generation_path, 
+                    save_path, 
+                    topic_list=None, 
+                    role="neighbor",
+                    rewrite=False):
     """
         If a generation contains:
             - "traditional" "typical" or mention of self-nationality
@@ -369,7 +374,15 @@ def plot_continentwise_markedness(home_dir, eval_paths, model_names, topic_list,
             plt.legend(title="Geographic Regions", loc='upper right')
         plt.savefig(f"../continentwise_markedness_{model_name}.png")
 
-def eval_skewness(home_dir, new_shortened_path, cache_dict_path, culture_symbol_path, save_path, topic_list=None, role="neighbor", gender=""):
+def eval_skewness(home_dir, 
+                  new_shortened_path, 
+                  cache_dict_path, 
+                  culture_symbol_path, 
+                  save_path, 
+                  topic_list=None, 
+                  role="neighbor", 
+                  gender="",
+                  rewrite=False):
     """
         We evaluate the strength (weighted percentage) or skewness (percentage) of generations that contains the cultural symbols of a certain culture
     """
@@ -383,7 +396,7 @@ def eval_skewness(home_dir, new_shortened_path, cache_dict_path, culture_symbol_
     with open(new_shortened_path, "r") as r:
         category_nationality_dict = json.load(r)
 
-    if os.path.exists(save_path):
+    if os.path.exists(save_path) and not rewrite:
         with open(save_path, "r") as r:
             strength_skewness_dict = json.load(r)
     else:
@@ -590,7 +603,15 @@ def eval_gpt4_diversity(home_dir, new_shortened_path, culture_symbol_path, save_
         json.dump(symbol_counter_dict, w, indent=4)
         
 
-def eval_diversity(home_dir, new_shortened_path, cache_dict_path, culture_symbol_path, save_path, topic_list=None, role="neighbor", gender=""):
+def eval_diversity(home_dir, 
+                   new_shortened_path, 
+                   cache_dict_path, 
+                   culture_symbol_path, 
+                   save_path, 
+                   topic_list=None, 
+                   role="neighbor", 
+                   gender="",
+                   rewrite=False):
     """
         We evaluate the number (and simpson index - deprecated) of unique cultural symbols in the generation of a certain culture
         
@@ -605,7 +626,7 @@ def eval_diversity(home_dir, new_shortened_path, cache_dict_path, culture_symbol
     # obtain data (..._shortened.json)
     with open(new_shortened_path, "r") as r:
         category_nationality_dict = json.load(r)
-    if os.path.exists(save_path):
+    if os.path.exists(save_path) and not rewrite:
         with open(save_path, "r") as r:
             symbol_counter_dict = json.load(r)
     else:
@@ -633,10 +654,10 @@ def eval_diversity(home_dir, new_shortened_path, cache_dict_path, culture_symbol
             cache_dict = pkl.load(r)
         with open(topic_culture_symbol_path, "r") as r:
             culture_symbol_dict = json.load(r)
-        # if topic not in symbol_counter_dict:
-        symbol_counter_dict[topic] = {}
-        # if gender not in symbol_counter_dict[topic]:
-        symbol_counter_dict[topic][gender] = {}
+        if topic not in symbol_counter_dict:
+            symbol_counter_dict[topic] = {}
+        if gender not in symbol_counter_dict[topic]:
+            symbol_counter_dict[topic][gender] = {}
         for nationality_index, (country, nationality) in enumerate(countries_nationalities_list):
             generated_values = category_nationality_dict[topic][role][nationality][gender]
             culture_symbol_counter = Counter()
@@ -914,7 +935,14 @@ def calculate_markedness_correlation_with_training_data(eval_path, eval_type="vo
         print(spearmanr(secondary_values_arr_n, secondary_values_arr_t))
         print(kendalltau(secondary_values_arr_n, secondary_values_arr_t))
 
-def eval_culture_symbol_presence_in_culture_neutral_prompt(home_dir, new_shortened_path, culture_symbol_path, save_path, topic_list=None, role="neighbor", gender=""):
+def eval_culture_symbol_presence_in_culture_neutral_prompt(home_dir, 
+                                                           new_shortened_path, 
+                                                           culture_symbol_path, 
+                                                           save_path, 
+                                                           topic_list=None, 
+                                                           role="neighbor", 
+                                                           gender="",
+                                                           rewrite=False):
     """
         We count the number of cultural symbols for each culture that exist in culture neutral prompts
     """
@@ -928,7 +956,7 @@ def eval_culture_symbol_presence_in_culture_neutral_prompt(home_dir, new_shorten
     # obtain data (..._shortened.json)
     with open(new_shortened_path, "r") as r:
         category_nationality_dict = json.load(r)
-    if os.path.exists(save_path):
+    if os.path.exists(save_path) and not rewrite:
         with open(save_path, "r") as r:
             symbol_counter_dict = json.load(r)
     else:
@@ -1158,6 +1186,7 @@ if __name__ == "__main__":
     parser.add_argument("--plot", action="store_true")
     parser.add_argument("--plot_secondary", type=str, default=None)
     parser.add_argument("--filter", action="store_true")
+    parser.add_argument("--rewrite", action="store_true")
     
     args = parser.parse_args()
     logger.info(args)
@@ -1208,9 +1237,9 @@ if __name__ == "__main__":
                 eval_gpt4_diversity(args.home_dir, shortened_data_path, symbols_path, diversity_save_path, args.topic_list, gender="male")
                 eval_gpt4_diversity(args.home_dir, shortened_data_path, symbols_path, diversity_save_path, args.topic_list, gender="female")
             else:
-                eval_diversity(args.home_dir, shortened_data_path, cache_dict_path_prefix, culture_symbol_path_prefix, diversity_save_path, args.topic_list)
-                eval_diversity(args.home_dir, shortened_data_path, cache_dict_path_prefix, culture_symbol_path_prefix, diversity_save_path, args.topic_list, gender="male")
-                eval_diversity(args.home_dir, shortened_data_path, cache_dict_path_prefix, culture_symbol_path_prefix, diversity_save_path, args.topic_list, gender="female")
+                eval_diversity(args.home_dir, shortened_data_path, cache_dict_path_prefix, culture_symbol_path_prefix, diversity_save_path, args.topic_list, rewrite=args.rewrite)
+                eval_diversity(args.home_dir, shortened_data_path, cache_dict_path_prefix, culture_symbol_path_prefix, diversity_save_path, args.topic_list, gender="male", rewrite=args.rewrite)
+                eval_diversity(args.home_dir, shortened_data_path, cache_dict_path_prefix, culture_symbol_path_prefix, diversity_save_path, args.topic_list, gender="female", rewrite=args.rewrite)
 
     elif args.eval == "skewness":
         skewness_save_path = f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_skewness_evaluation_count.json"
@@ -1219,9 +1248,9 @@ if __name__ == "__main__":
             plot_world_map_with_skewness(skewness_save_path, model_name, args.topic_list, gender="male")
             plot_world_map_with_skewness(skewness_save_path, model_name, args.topic_list, gender="female")
         else:
-            eval_skewness(args.home_dir, shortened_data_path, cache_dict_path_prefix, culture_symbol_path_prefix, skewness_save_path, args.topic_list)
-            eval_skewness(args.home_dir, shortened_data_path, cache_dict_path_prefix, culture_symbol_path_prefix, skewness_save_path, args.topic_list, gender="male")
-            eval_skewness(args.home_dir, shortened_data_path, cache_dict_path_prefix, culture_symbol_path_prefix, skewness_save_path, args.topic_list, gender="female")
+            eval_skewness(args.home_dir, shortened_data_path, cache_dict_path_prefix, culture_symbol_path_prefix, skewness_save_path, args.topic_list, rewrite=args.rewrite)
+            eval_skewness(args.home_dir, shortened_data_path, cache_dict_path_prefix, culture_symbol_path_prefix, skewness_save_path, args.topic_list, gender="male", rewrite=args.rewrite)
+            eval_skewness(args.home_dir, shortened_data_path, cache_dict_path_prefix, culture_symbol_path_prefix, skewness_save_path, args.topic_list, gender="female", rewrite=args.rewrite)
     
     elif args.eval == "markedness":
         markedness_save_path = f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_markedness_evaluation.json"
@@ -1250,7 +1279,7 @@ if __name__ == "__main__":
             # plot_bar_chart_with_markedness_by_topic(markedness_paths, model_names, args.topic_list)
             
         else:
-            eval_markedness(args.home_dir, original_data_path, markedness_save_path, args.topic_list)
+            eval_markedness(args.home_dir, original_data_path, markedness_save_path, args.topic_list, rewrite=args.rewrite)
     
     elif args.eval == "culture_agnostic":
         culture_agnostic_save_path = f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_culture_agnostic_overlap_evaluation.json"
@@ -1270,7 +1299,7 @@ if __name__ == "__main__":
             if args.model_name == "gpt-4":
                 eval_gpt4_culture_symbol_presence_in_culture_neutral_prompt(args.home_dir, shortened_data_path, culture_symbol_path_prefix, culture_agnostic_save_path, args.topic_list, gender="")
             else:
-                eval_culture_symbol_presence_in_culture_neutral_prompt(args.home_dir, shortened_data_path, culture_symbol_path_prefix, culture_agnostic_save_path, args.topic_list, gender="")
+                eval_culture_symbol_presence_in_culture_neutral_prompt(args.home_dir, shortened_data_path, culture_symbol_path_prefix, culture_agnostic_save_path, args.topic_list, gender="", rewrite=args.rewrite)
     
     elif args.eval == "correlation":
         # uncomment for diversity correlation with dataset topic frequency
