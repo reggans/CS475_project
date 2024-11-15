@@ -286,14 +286,28 @@ def posthoc_shorten_answer(save_path, topic_list, rewrite=False, model_name="", 
                 else:
                     continue
     if batch:
-        results = model.launch_batch(tasks, 
-                                     f"data/{model_name}_shorten_batchinput.jsonl", 
-                                     temperature=1, 
-                                     max_tokens=15, 
-                                     top_p=1, 
-                                     n=1)
+        if not os.path.exists(f"data/{model_name}_shorten_batchinput_result.jsonl"):    
+            results = model.launch_batch(tasks, 
+                                        f"data/{model_name}_shorten_batchinput.jsonl", 
+                                        temperature=1, 
+                                        max_tokens=15, 
+                                        top_p=1, 
+                                        n=1)
+        else:
+            responses = []
+            with open(f"data/{model_name}_shorten_batchinput_result.jsonl", "r") as f:
+                for line in f:
+                    response = json.loads(line)
+                    responses.append(response)
+            
+            results = []
+            for response in responses:
+                task_id = response["custom_id"]
+                result = response["response"]["body"]["choices"][0]["message"]["content"]
+                results.append((task_id, result))
         
         for i, (task_id, generation) in enumerate(tqdm(results, desc="saving batch results")):
+            print(task_id)
             topic, role, nationality, gender, idx = task_id.split("_")
 
             new_topic_nationality_dict[topic][role][nationality][gender].append(generation)
