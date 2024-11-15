@@ -91,7 +91,7 @@ class OpenAIWrapper:
         
         client = openai.OpenAI()
         batch_input_file = client.files.create(
-            file=open("file_name", "rb"),
+            file=open(file_name, "rb"),
             purpose="batch"
         )
 
