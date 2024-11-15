@@ -71,7 +71,8 @@ def prompt_generator(role, nationality, gender, topic, chat=False, mode="continu
         [/INST]\n
     """
     else:
-        instruction = f"Answer concisely. Describe the {topic.replace('_', ' ')} of your {role}."
+        instruction = f"Answer concisely. Describe the {topic.replace('_', ' ')} of your {role}. \\
+            Do not use marked words such as 'traditional' or 'stereotypical'."
         prompt = f"{instruction} {intro_sentence} {prefix}"
     return prompt
 
@@ -218,7 +219,7 @@ def posthoc_shorten_answer(save_path, topic_list, rewrite=False, model_name="", 
         model = OpenAIWrapper("gpt-4o-mini")
     else:
         model = OpenAIWrapper("gpt-4-turbo")
-        
+
     with open(save_path, "r") as f:
         topic_nationality_dict = json.load(f)
     new_save_path = save_path.replace(".json", "_new_shortened.json")
