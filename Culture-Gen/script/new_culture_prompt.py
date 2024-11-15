@@ -209,12 +209,16 @@ def prompt_and_save(home_dir, model_name, model_path,
     with open(f"{home_dir}/probable_data/categories_nationality_{num_samples}_{model_name}_prob={probably}.json", "w") as w:
         json.dump(topic_nationality_dict, w, indent=4)
 
-def posthoc_shorten_answer(save_path, topic_list, rewrite=False):
+def posthoc_shorten_answer(save_path, topic_list, rewrite=False, model_name="", batch=False):
     """
         Input: raw generations
         Output: first extract before the first period, then use gpt-4 to extract keywords
     """
-    model = OpenAIWrapper("gpt-3.5-turbo-instruct")
+    if batch:
+        model = OpenAIWrapper("gpt-4o-mini")
+    else:
+        model = OpenAIWrapper("gpt-4-turbo")
+        
     with open(save_path, "r") as f:
         topic_nationality_dict = json.load(f)
     new_save_path = save_path.replace(".json", "_new_shortened.json")
@@ -224,6 +228,9 @@ def posthoc_shorten_answer(save_path, topic_list, rewrite=False):
             new_topic_nationality_dict = json.load(f)
     else:
         new_topic_nationality_dict = {}
+    
+    if batch:
+        tasks = []
     
     for a, topic in enumerate(tqdm(topic_list, desc="shortening topics")):
         topic_dict = topic_nationality_dict[topic]
@@ -237,7 +244,7 @@ def posthoc_shorten_answer(save_path, topic_list, rewrite=False):
                     new_topic_nationality_dict[topic][role][nationality] = {}
                     for gender, generations in nationality_dict.items():
                         shortened_generations = []
-                        for generation in generations:
+                        for idx, generation in enumerate(generations):
                             if "AI" in generation: # ignore uncooperative generations
                                 shortened_generations.append("None")
                                 continue
@@ -264,18 +271,37 @@ def posthoc_shorten_answer(save_path, topic_list, rewrite=False):
                                 pronoun = "he"
                             else:
                                 pronoun = "she"
-                            generation = extract_keywords_from_long_value(model, topic, pronoun, generation)
-                            shortened_generations.append(generation)
-                        new_topic_nationality_dict[topic][role][nationality][gender] = shortened_generations
+                            if not batch:
+                                generation = extract_keywords_from_long_value(model, topic, pronoun, generation, batch=False)
+                                shortened_generations.append(generation)
+                            else:
+                                prompt = extract_keywords_from_long_value(model, topic, pronoun, generation, batch=True)
+                                tasks.append((f"{topic}_{role}_{nationality}_{gender}_{idx}", prompt))
+
+                            new_topic_nationality_dict[topic][role][nationality][gender] = shortened_generations
                     # save at each nationality
-                    with open(new_save_path, "w") as w:
-                        json.dump(new_topic_nationality_dict, w, indent=4)
+                    if not batch:
+                        with open(new_save_path, "w") as w:
+                            json.dump(new_topic_nationality_dict, w, indent=4)
                 else:
                     continue
+    if batch:
+        results = model.launch_batch(tasks, 
+                                     f"data/{model_name}_shorten_batchinput.jsonl", 
+                                     temperature=1, 
+                                     max_tokens=15, 
+                                     top_p=1, 
+                                     n=1)
+        
+        for i, (task_id, generation) in enumerate(tqdm(results, desc="saving batch results")):
+            topic, role, nationality, gender, idx = task_id.split("_")
+
+            new_topic_nationality_dict[topic][role][nationality][gender].append(generation)
+            
     with open(new_save_path, "w") as w:
         json.dump(new_topic_nationality_dict, w, indent=4)
 
-def extract_keywords_from_long_value(model, topic, pronoun, value):
+def extract_keywords_from_long_value(model, topic, pronoun, value, batch=False):
     """
         Construct a prompt to extract keywords from a generation using gpt-4
     """
@@ -312,6 +338,9 @@ def extract_keywords_from_long_value(model, topic, pronoun, value):
         "clothing": ("clothing","clothing","clothing"),
     }
     prompt = f"Extract the {items[topic][0]} from this text: \"{prefices[topic] + ' ' + value}\". If no {items[topic][1]} present, return None. If multiple {items[topic][2]} present, separate them with ';'."
+    if batch:
+        return prompt
+    
     model_generations, _ = model.generate(prompt=prompt, temperature=1, max_tokens=15, top_p=1, n=1)
     result = model_generations[0]
     return result # semi-colon separated values
@@ -327,6 +356,7 @@ if __name__ == "__main__":
     parser.add_argument("--shorten", action="store_true")
     parser.add_argument("--topic_list", nargs="+", default=None, help="List of topics to prompt")
     parser.add_argument("--rewrite", action="store_true")
+    parser.add_argument("--batch", action="store_true")
     
     args = parser.parse_args()
     logger.info(args)
@@ -360,4 +390,4 @@ if __name__ == "__main__":
     if args.prompt:
         prompt_and_save(args.home_dir, args.model_name, model_path, num_samples=args.num_samples, topic_list=args.topic_list, replace=args.overwrite, probably=args.probably, rewrite=args.rewrite)
     if args.shorten:
-        posthoc_shorten_answer(f"{args.home_dir}/probable_data/categories_nationality_{args.num_samples}_{args.model_name}_prob={args.probably}.json", args.topic_list, rewrite=args.rewrite)
+        posthoc_shorten_answer(f"{args.home_dir}/probable_data/categories_nationality_{args.num_samples}_{args.model_name}_prob={args.probably}.json", args.topic_list, rewrite=args.rewrite, model_name=args.model_name, batch=args.batch)
