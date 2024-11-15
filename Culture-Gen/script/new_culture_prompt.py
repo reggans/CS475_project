@@ -286,7 +286,7 @@ def posthoc_shorten_answer(save_path, topic_list, rewrite=False, model_name="", 
                 else:
                     continue
     if batch:
-        if not os.path.exists(f"data/{model_name}_shorten_batchinput_result.jsonl"):    
+        if not os.path.exists(f"data/{model_name}_shorten_batchinput_result.jsonl") or rewrite:    
             results = model.launch_batch(tasks, 
                                         f"data/{model_name}_shorten_batchinput.jsonl", 
                                         temperature=1, 
