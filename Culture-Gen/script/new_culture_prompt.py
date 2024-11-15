@@ -307,8 +307,19 @@ def posthoc_shorten_answer(save_path, topic_list, rewrite=False, model_name="", 
                 results.append((task_id, result))
         
         for i, (task_id, generation) in enumerate(tqdm(results, desc="saving batch results")):
-            print(task_id)
-            topic, role, nationality, gender, idx = task_id.split("_")
+            keys = task_id.split("_")
+            if len(keys) == 5:  # topic is one word
+                topic = keys[0]
+                role = keys[1]
+                nationality = keys[2]
+                gender = keys[3]
+                idx = keys[4]
+            else:               # topic is multiple words
+                topic = "_".join(keys[0:-4])
+                role = keys[-4]
+                nationality = keys[-3]
+                gender = keys[-2]
+                idx = keys[-1]
 
             new_topic_nationality_dict[topic][role][nationality][gender].append(generation)
             
