@@ -218,13 +218,14 @@ def posthoc_shorten_answer(save_path, topic_list, rewrite=False):
     with open(save_path, "r") as f:
         topic_nationality_dict = json.load(f)
     new_save_path = save_path.replace(".json", "_new_shortened.json")
+
+    if os.path.exists(new_save_path) and not rewrite:
+        with open(new_save_path, "r") as f:
+            new_topic_nationality_dict = json.load(f)
+    else:
+        new_topic_nationality_dict = {}
     
     for a, topic in enumerate(tqdm(topic_list, desc="shortening topics")):
-        if os.path.exists(new_save_path) and not rewrite:
-            with open(new_save_path, "r") as f:
-                new_topic_nationality_dict = json.load(f)
-        else:
-            new_topic_nationality_dict = {}
         topic_dict = topic_nationality_dict[topic]
         if topic not in new_topic_nationality_dict:
             new_topic_nationality_dict[topic] = {}
