@@ -73,7 +73,7 @@ class OpenAIWrapper:
             query = {
                 "custom_id": task_id,
                 "method": "POST",
-                "url": "v1/chat/completions",
+                "url": "/v1/chat/completions",
                 "body": {
                     "model": self.model_path,
                     "messages": [{"role": "user", "content": prompt}],
@@ -97,7 +97,7 @@ class OpenAIWrapper:
 
         batch_job = client.batches.create(
             input_file_id=batch_input_file.id,
-            endpoint="v1/chat/completions",
+            endpoint="/v1/chat/completions",
             completion_window="24h",
         )
         
