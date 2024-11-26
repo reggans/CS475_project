@@ -85,44 +85,50 @@ class OpenAIWrapper:
             }
             queries.append(query)
 
-        with open(file_name, "w") as f:
-            for query in queries:
-                f.write(json.dumps(query) + "\n")
+        for i in range(0, len(queries), 10000):
+            with open(file_name.replace(".jsonl", f"_{i}.jsonl"), "w") as f:
+                for query in queries[i:i+10000]:
+                    f.write(json.dumps(query) + "\n")
         
-        client = openai.OpenAI()
-        batch_input_file = client.files.create(
-            file=open(file_name, "rb"),
-            purpose="batch"
-        )
+            client = openai.OpenAI()
+            batch_input_file = client.files.create(
+                file=open(file_name.replace(".jsonl", f"_{i}.jsonl"), "rb"),
+                purpose="batch"
+            )
 
-        batch_job = client.batches.create(
-            input_file_id=batch_input_file.id,
-            endpoint="/v1/chat/completions",
-            completion_window="24h",
-        )
-        
-        print("Waiting for batch job to complete...")
-        while 1:
-            batch_job = client.batches.retrieve(batch_job.id)
-            if batch_job.status == "completed":
-                result_file_id = batch_job.output_file_id
-                result = client.files.content(result_file_id).content
+            batch_job = client.batches.create(
+                input_file_id=batch_input_file.id,
+                endpoint="/v1/chat/completions",
+                completion_window="24h",
+            )
+            
+            print("Waiting for batch job to complete...")
+            while 1:
+                batch_job = client.batches.retrieve(batch_job.id)
 
-                result_file_name = file_name.replace(".jsonl", "_result.jsonl")
-                with open(result_file_name, "wb") as f:
-                    f.write(result)
+                if batch_job.status == "failed" or batch_job.status == "expired":
+                    print(batch_job)
+                    raise Exception("Batch job failed")
+                
 
-                print("Batch job completed")
-                break
-            elif batch_job.status == "failed" or batch_job.status == "expired":
-                raise Exception("Batch job failed")
-            time.sleep(10)
+                if batch_job.status == "completed":
+                    result_file_id = batch_job.output_file_id
+                    result = client.files.content(result_file_id).content
+
+                    result_file_name = file_name.replace(".jsonl", f"_result{i}.jsonl")
+                    with open(result_file_name, "wb") as f:
+                        f.write(result)
+
+                    print(f"Batch job {i} completed")
+                    break
+                time.sleep(10)
         
         responses = []
-        with open(result_file_name, "r") as f:
-            for line in f:
-                response = json.loads(line)
-                responses.append(response)
+        for i in range(0, len(queries), 10000):
+            with open(file_name.replace(".jsonl", f"_result{i}.jsonl"), "r") as f:
+                for line in f:
+                    response = json.loads(line)
+                    responses.append(response)
         
         results = []
         for response in responses:

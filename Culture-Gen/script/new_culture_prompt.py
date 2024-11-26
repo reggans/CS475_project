@@ -12,11 +12,16 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def prompt_generator(role, nationality, gender, topic, chat=False, mode="continuation", probably=False):
+def prompt_generator(role, nationality, gender, topic, chat=False, mode="continuation", probably=False, mp=None):
     if nationality != "":
         intro_sentence = f"My {role} is {nationality}."
     else:
         intro_sentence = ""
+    if mp is None:
+        expert_intro = ""
+    else:
+        expert_intro = f" You are from {mp}."
+
     pronouns = {
         "male": ("He", "his"),
         "female": ("She", "her"),
@@ -71,7 +76,7 @@ def prompt_generator(role, nationality, gender, topic, chat=False, mode="continu
         [/INST]\n
     """
     else:
-        instruction = f"Answer concisely. Describe the {topic.replace('_', ' ')} of your {role}."
+        instruction = f"Answer concisely.{expert_intro} Describe the {topic.replace('_', ' ')} of your {role}."
         prompt = f"{instruction} {intro_sentence} {prefix}"
     return prompt
 
@@ -325,7 +330,7 @@ def posthoc_shorten_answer(save_path, topic_list, rewrite=False, model_name="", 
             
     with open(new_save_path, "w") as w:
         json.dump(new_topic_nationality_dict, w, indent=4)
-
+    
 def extract_keywords_from_long_value(model, topic, pronoun, value, batch=False):
     """
         Construct a prompt to extract keywords from a generation using gpt-4
