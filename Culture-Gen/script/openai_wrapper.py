@@ -104,13 +104,12 @@ class OpenAIWrapper:
             
             print("Waiting for batch job to complete...")
             while 1:
-                batch_job = client.batches.retrieve(batch_job.id)
+                batch_job = client.batches. retrieve(batch_job.id)
 
                 if batch_job.status == "failed" or batch_job.status == "expired":
                     print(batch_job)
                     raise Exception("Batch job failed")
                 
-
                 if batch_job.status == "completed":
                     result_file_id = batch_job.output_file_id
                     result = client.files.content(result_file_id).content
