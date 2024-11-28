@@ -16,7 +16,7 @@ import time
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def extract_all_symbols_from_generation(home_dir, shortened_data_path, save_path, topic_list=None, r="neighbor"):
+def extract_all_symbols_from_generation(home_dir, shortened_data_path, save_path, topic_list=None, r="neighbor", rewrite=False):
     """
         From the shortened data, extract all symbols that do not contain "traditional", "typical" or contains the nationality
         Extract unigram, bigram, trigram, fourgram and all symbols for potential candidates
@@ -30,7 +30,7 @@ def extract_all_symbols_from_generation(home_dir, shortened_data_path, save_path
     # obtain data (..._shortened.json)
     with open(shortened_data_path, "r") as r:
         category_nationality_dict = json.load(r)
-    if os.path.exists(save_path):
+    if os.path.exists(save_path) and not rewrite:
         with open(save_path, "r") as r2:
             culture_symbols_dict = json.load(r2)
     else:
@@ -219,7 +219,13 @@ def extract_keyword_probability_distribution(keyword, topic, role, nationalities
     # all_probs: a list of sentence log probability of each nationality, for a given keyword
     return all_probs
 
-def precalculate_culture_symbol_nationality_prob(all_symbols_path, model_path, nationalities, role="neighbor", topic_list=None, baseline=False):
+def precalculate_culture_symbol_nationality_prob(all_symbols_path, 
+                                                 model_path, 
+                                                 nationalities, 
+                                                 role="neighbor", 
+                                                 topic_list=None, 
+                                                 baseline=False,
+                                                 rewrite=False):
     """
         Calculate all n-grams' probability distribution for each nationality given each topic and save to cache
         Only works with models with logits
@@ -241,7 +247,7 @@ def precalculate_culture_symbol_nationality_prob(all_symbols_path, model_path, n
     if baseline:
         logger.info("Calculating baseline")
         cache_path = all_symbols_path.replace(".json", "_probability_cache_topical_baseline.pkl")
-        if os.path.exists(cache_path):
+        if os.path.exists(cache_path) and not rewrite:
             cache_dict = pkl.load(open(cache_path, "rb"))
         else:
             cache_dict = defaultdict(dict)
@@ -272,7 +278,13 @@ def precalculate_culture_symbol_nationality_prob(all_symbols_path, model_path, n
             with open(all_symbols_path.replace(".json", f"_probability_cache_{topic}.pkl"), "wb") as w:
                 pkl.dump(cache_dict, w)
 
-def choose_keywords_for_cultures(generated_values, target_nationality, target_country, nationalities, cache_dict, baseline_cache_dict, model_name):
+def choose_keywords_for_cultures(generated_values, 
+                                 target_nationality, 
+                                 target_country, 
+                                 nationalities, 
+                                 cache_dict, 
+                                 baseline_cache_dict, 
+                                 model_name):
     """
         generated_values are obtained from new_shortened.json files
         For each candidate value, we calculate the probability distribution of its 1-4 ngrams. We choose the ngram with the highest sentence probability as the culture symbol candidate
@@ -450,6 +462,7 @@ if __name__ == "__main__":
     parser.add_argument("--probability", action="store_true", help="precalculate the probability distribution of symbol, topic, nationality")
     parser.add_argument("--baseline", action="store_true")
     parser.add_argument("--choose", action="store_true", help="choose culture symbols for nationality")
+    parser.add_argument("--rewrite", action="store_true", help="rewrite the cache")
     
     args = parser.parse_args()
     logger.info(args)
@@ -477,7 +490,7 @@ if __name__ == "__main__":
             value_to_culture_mapping_path_prefix = f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_value_to_culture_mapping.json"
             extract_gpt4_culture_symbols_and_map_to_nationality(args.home_dir, shortened_data_path=shortened_data_path, save_path=save_path.replace(".json", "_prefixed.json"), value_to_culture_mapping_path_prefix=value_to_culture_mapping_path_prefix, topic_list=args.topic_list)
         else:
-            extract_all_symbols_from_generation(args.home_dir, shortened_data_path=shortened_data_path, save_path=save_path, topic_list=args.topic_list)
+            extract_all_symbols_from_generation(args.home_dir, shortened_data_path=shortened_data_path, save_path=save_path, topic_list=args.topic_list, rewrite=args.rewrite)
 
     if args.probability:
         with open(f"{args.home_dir}/data/nationalities.csv", "r") as r:
@@ -487,7 +500,7 @@ if __name__ == "__main__":
         logger.info("Loaded nationalities")
 
         all_symbols_path = f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_all_symbols.json"
-        precalculate_culture_symbol_nationality_prob(all_symbols_path, model_path, nationalities, role="neighbor", topic_list=args.topic_list, baseline=args.baseline)
+        precalculate_culture_symbol_nationality_prob(all_symbols_path, model_path, nationalities, role="neighbor", topic_list=args.topic_list, baseline=args.baseline, rewrite=args.rewrite)
     
     if args.choose:
         # path to save number of culture symbols for each culture that overlaps with culture agnostic generations
@@ -519,7 +532,7 @@ if __name__ == "__main__":
                 for cultural_value_key in culture_values_dict:
                     culture_nationality_mapping_dict[cultural_value_key].append(target_nationality)
                 print(f"Number of culture symbols for {target_nationality}: {len(culture_values_dict)}")
-                print(culture_nationality_mapping_dict)
+                # print(culture_nationality_mapping_dict)
             # save to file
             with open(f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_value_to_culture_mapping_{topic}.json", "w") as w:
                 json.dump(culture_nationality_mapping_dict, w, indent=4)
