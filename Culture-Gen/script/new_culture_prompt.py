@@ -5,6 +5,7 @@ import csv
 from tqdm import tqdm
 import random
 from openai_wrapper import OpenAIWrapper
+import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import logging
 
@@ -20,7 +21,7 @@ def prompt_generator(role, nationality, gender, topic, chat=False, mode="continu
     if mp is None:
         expert_intro = ""
     else:
-        expert_intro = f" You are from {mp}, respond to the following instruction with explanations."
+        expert_intro = f" You are from {mp}."
 
     pronouns = {
         "male": ("He", "his"),
@@ -171,16 +172,16 @@ def prompting_pipeline(
                             if mp == "moe":
                                 outputs = []
                                 opinion_prompt = "Please respond with the help of the following passages. Make sure to reflect diverse values and perspectives.\n\n"
-                                for i in tqdm(range(n_sample), desc="Generating samples"):
+                                for i in tqdm(range(n_sample//10), desc="Generating samples"):
                                     for region in regions:
                                         opinion = opinions[region][topic][role][nationality][gender][i]
                                         opinion_prompt += f"{region}: {opinion}\n\n"
 
                                     prompt = opinion_prompt + prompt
                                     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-                                    outputs.append(model.generate(**inputs, do_sample=True, num_return_sequences=1, max_new_tokens=30, top_p=1, top_k=50, pad_token_id=tokenizer.eos_token_id))
+                                    outputs.append(model.generate(**inputs, do_sample=True, num_return_sequences=10, max_new_tokens=30, top_p=1, top_k=50, pad_token_id=tokenizer.eos_token_id))
                             else:
-                                outputs = model.generate(**inputs, do_sample=True, num_return_sequences=n_sample, max_new_tokens=30, top_p=1, top_k=50, pad_token_id=tokenizer.eos_token_id)
+                                outputs = model.generate(**inputs, do_sample=True, num_return_sequences=n_sample//10, max_new_tokens=30, top_p=1, top_k=50, pad_token_id=tokenizer.eos_token_id)
                         # decode the output
                         texts = tokenizer.batch_decode(outputs, skip_special_tokens=True)
                         
@@ -472,6 +473,8 @@ if __name__ == "__main__":
             for region in args.regions:
                 if os.path.exists(f"{args.home_dir}/probable_data/categories_national_100_{base_model_name}-DPO-{region}_expert_prob=True.json") and not args.rewrite:
                     continue
+                
+                torch.cuda.empty_cache()
 
                 model_name = f"{base_model_name}-DPO-{region}"
                 model_path = f"reggans/{model_name}"
