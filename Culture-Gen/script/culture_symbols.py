@@ -481,7 +481,8 @@ if __name__ == "__main__":
         model_name = model_path.split("/")[-1]
 
     if args.topic_list == None:
-        args.topic_list = ["favorite_music", "music_instrument", "exercise_routine", "favorite_show_or_movie", "food", "picture_on_the_front_door", "statue_on_the_front_door", "clothing"]
+        # args.topic_list = ["favorite_music", "music_instrument", "exercise_routine", "favorite_show_or_movie", "food", "picture_on_the_front_door", "statue_on_the_front_door", "clothing"]
+        args.topic_list = ["favorite_music", "music_instrument", "exercise_routine", "favorite_show_or_movie", "food", "clothing"]
 
     if args.extract:
         shortened_data_path = f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_new_shortened.json"

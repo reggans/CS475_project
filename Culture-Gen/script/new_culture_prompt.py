@@ -20,7 +20,7 @@ def prompt_generator(role, nationality, gender, topic, chat=False, mode="continu
     if mp is None:
         expert_intro = ""
     else:
-        expert_intro = f" You are from {mp}."
+        expert_intro = f" You are from {mp}, respond to the following instruction with explanations."
 
     pronouns = {
         "male": ("He", "his"),
@@ -76,7 +76,10 @@ def prompt_generator(role, nationality, gender, topic, chat=False, mode="continu
         [/INST]\n
     """
     else:
-        instruction = f"Answer concisely.{expert_intro} Describe the {topic.replace('_', ' ')} of your {role}."
+        if mp is None or mp == "moe":
+            instruction = f"Answer concisely. Describe the {topic.replace('_', ' ')} of your {role}."
+        else:
+            instruction = f"{expert_intro} Describe the {topic.replace('_', ' ')} of your {role}."
         prompt = f"{instruction} {intro_sentence} {prefix}"
     return prompt
 
@@ -105,6 +108,8 @@ def prompting_pipeline(
         mode="continuation",
         probably=False,
         rewrite=False,
+        mp=None,
+        regions=None,
         ):
     """
         Prompts model from `model_path` with prompts including `nationalities` and `topics` and save the results to `save_path`.
@@ -115,6 +120,14 @@ def prompting_pipeline(
     else:
         tokenizer = AutoTokenizer.from_pretrained(model_path)
         model = AutoModelForCausalLM.from_pretrained(model_path, device_map="auto", do_sample=True)
+    
+    opinions = {}
+    if mp == "moe":
+        for region in regions:
+            opinion_path = save_path.replace("_moe", f"_DPO-{region}")
+            with open(opinion_path, "r") as f:
+                opinion = json.load(f)
+            opinions[region] = opinion
 
     nationalities.append("") # neutral baseline
     if os.path.exists(save_path) and not rewrite:
@@ -143,7 +156,7 @@ def prompting_pipeline(
                 
                 topic_nationality_dict[topic][role][nationality] = {} 
                 for gender in ["male", "female", ""]: # gender neutral baseline
-                    prompt = prompt_generator(role, nationality, gender, topic, chat=chat, mode=mode, probably=probably)
+                    prompt = prompt_generator(role, nationality, gender, topic, chat=chat, mode=mode, probably=probably, mp=mp)
                     generated = []
                     if model_path == "gpt-4":
                         for i in range(n_sample//10):
@@ -155,7 +168,19 @@ def prompting_pipeline(
                         if chat:
                             outputs = model.generate(**inputs, do_sample=True, num_return_sequences=n_sample, max_new_tokens=100, top_p=1, top_k=50, pad_token_id=tokenizer.eos_token_id)
                         else:
-                            outputs = model.generate(**inputs, do_sample=True, num_return_sequences=n_sample, max_new_tokens=30, top_p=1, top_k=50, pad_token_id=tokenizer.eos_token_id)
+                            if mp == "moe":
+                                outputs = []
+                                opinion_prompt = "Please respond with the help of the following passages. Make sure to reflect diverse values and perspectives.\n\n"
+                                for i in tqdm(range(n_sample), desc="Generating samples"):
+                                    for region in regions:
+                                        opinion = opinions[region][topic][role][nationality][gender][i]
+                                        opinion_prompt += f"{region}: {opinion}\n\n"
+
+                                    prompt = opinion_prompt + prompt
+                                    inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+                                    outputs.append(model.generate(**inputs, do_sample=True, num_return_sequences=1, max_new_tokens=30, top_p=1, top_k=50, pad_token_id=tokenizer.eos_token_id))
+                            else:
+                                outputs = model.generate(**inputs, do_sample=True, num_return_sequences=n_sample, max_new_tokens=30, top_p=1, top_k=50, pad_token_id=tokenizer.eos_token_id)
                         # decode the output
                         texts = tokenizer.batch_decode(outputs, skip_special_tokens=True)
                         
@@ -177,6 +202,8 @@ def prompt_and_save(home_dir, model_name, model_path,
                     replace=False,
                     probably=True,
                     rewrite=False,
+                    mp=None,
+                    regions=None
                     ):
     """
         Prompts model from `model_path` and regulate how many samples to obtain using `num_samples`.
@@ -208,8 +235,15 @@ def prompt_and_save(home_dir, model_name, model_path,
     chat = "chat" in model_name
     # mode = "mask" if "chat" in model_name else "continuation"
     mode = "continuation"
-    
-    topic_nationality_dict = prompting_pipeline(nationalities, f"{home_dir}/probable_data/categories_nationality_{num_samples}_{model_name}_prob={probably}.json", model_path=model_path, n_sample=num_samples, topic_list=topic_list, replace=replace, chat=chat, mode=mode, probably=probably, rewrite=rewrite)
+
+    if mp == "moe":
+        save_path = f"{home_dir}/probable_data/categories_nationality_{num_samples}_{model_name}_moe_prob={probably}.json"
+    elif mp is not None:
+        save_path = f"{home_dir}/probable_data/categories_nationality_{num_samples}_{model_name}_expert_prob={probably}.json"
+    else:
+        save_path = f"{home_dir}/probable_data/categories_nationality_{num_samples}_{model_name}_prob={probably}.json"
+
+    topic_nationality_dict = prompting_pipeline(nationalities, save_path=save_path, model_path=model_path, n_sample=num_samples, topic_list=topic_list, replace=replace, chat=chat, mode=mode, probably=probably, rewrite=rewrite, mp=mp, regions=regions)
     # topic_nationality_dict = prompt_with_no_nationality(f"../new_data/categories_nationality_{num_samples}_{model_name}_new_baseline.json", model_path, num_samples)
     with open(f"{home_dir}/probable_data/categories_nationality_{num_samples}_{model_name}_prob={probably}.json", "w") as w:
         json.dump(topic_nationality_dict, w, indent=4)
@@ -387,20 +421,12 @@ if __name__ == "__main__":
     parser.add_argument("--topic_list", nargs="+", default=None, help="List of topics to prompt")
     parser.add_argument("--rewrite", action="store_true")
     parser.add_argument("--batch", action="store_true")
+    parser.add_argument("--regions", nargs="*", default=None, const=[], help="List of regions to prompt")
     
     args = parser.parse_args()
     logger.info(args)
 
-    if args.model_name =="gpt-4":
-        model_path = "gpt-4"
-    elif args.model_name == "llama2-13b":
-        model_path = "meta-llama/Llama-2-13b-hf"
-    elif args.model_name == "mistral-7b":
-        model_path = "mistralai/Mistral-7B-v0.1"
-    else:
-        model_path = args.model_name
-        args.model_name = model_path.split("/")[-1]
-    if args.topic_list == None:
+    if args.topic_list is None:
         args.topic_list = [
                         # "occupation",
                         "favorite_music",
@@ -416,8 +442,40 @@ if __name__ == "__main__":
                         # "major",
                         "clothing",
                     ]
+    if args.regions == []:
+        with open(f"{args.home_dir}/data/nationalities.csv", "r") as r:
+            reader = csv.reader(r)
+            next(reader)
+            args.regions = set([row[2] for row in reader])
 
-    if args.prompt:
-        prompt_and_save(args.home_dir, args.model_name, model_path, num_samples=args.num_samples, topic_list=args.topic_list, replace=args.overwrite, probably=args.probably, rewrite=args.rewrite)
-    if args.shorten:
-        posthoc_shorten_answer(f"{args.home_dir}/probable_data/categories_nationality_{args.num_samples}_{args.model_name}_prob={args.probably}.json", args.topic_list, rewrite=args.rewrite, model_name=args.model_name, batch=args.batch)
+    if args.regions is None:
+        if args.model_name =="gpt-4":
+            model_path = "gpt-4"
+        elif args.model_name == "llama2-13b":
+            model_path = "meta-llama/Llama-2-13b-hf"
+        elif args.model_name == "mistral-7b":
+            model_path = "mistralai/Mistral-7B-v0.1"
+        else:
+            model_path = args.model_name
+            args.model_name = model_path.split("/")[-1]
+    
+        if args.prompt:
+            prompt_and_save(args.home_dir, args.model_name, model_path, num_samples=args.num_samples, topic_list=args.topic_list, replace=args.overwrite, probably=args.probably, rewrite=args.rewrite)
+        if args.shorten:
+            posthoc_shorten_answer(f"{args.home_dir}/probable_data/categories_nationality_{args.num_samples}_{args.model_name}_prob={args.probably}.json", args.topic_list, rewrite=args.rewrite, model_name=args.model_name, batch=args.batch)
+    
+    else:
+        base_model_path = args.model_name
+        base_model_name = base_model_path.split("/")[-1]
+
+        if args.prompt:
+            for region in args.regions:
+                model_name = f"{base_model_name}-DPO-{region}"
+                model_path = f"reggans/{model_name}"
+                
+                prompt_and_save(args.home_dir, model_name, model_path, num_samples=args.num_samples, topic_list=args.topic_list, replace=args.overwrite, probably=args.probably, rewrite=args.rewrite, mp=region)
+
+            prompt_and_save(args.home_dir, base_model_name, base_model_path, num_samples=args.num_samples, topic_list=args.topic_list, replace=args.overwrite, probably=args.probably, rewrite=args.rewrite, mp="moe", regions=args.regions)
+        
+        if args.shorten:
+            posthoc_shorten_answer(f"{args.home_dir}/probable_data/categories_nationality_{args.num_samples}_{args.model_name}_moe_prob={args.probably}.json", args.topic_list, rewrite=args.rewrite, model_name=args.model_name, batch=args.batch)
