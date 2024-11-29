@@ -421,7 +421,7 @@ if __name__ == "__main__":
     parser.add_argument("--topic_list", nargs="+", default=None, help="List of topics to prompt")
     parser.add_argument("--rewrite", action="store_true")
     parser.add_argument("--batch", action="store_true")
-    parser.add_argument("--regions", nargs="*", default=None, const=[], help="List of regions to prompt")
+    parser.add_argument("--regions", nargs="*", default=None, help="List of regions to prompt")
     
     args = parser.parse_args()
     logger.info(args)
