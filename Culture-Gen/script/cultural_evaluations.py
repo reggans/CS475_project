@@ -1271,7 +1271,13 @@ if __name__ == "__main__":
 
             # uncomment for plotting continentwise markedness
             # model_names = ["gpt-4", "llama2-13b", "mistral-7b"]
-            model_names = ["Llama-3.2-3B-Instruct-bnb-4bit-DPO-All", "Llama-3.2-3B-Instruct-bnb-4bit"]
+            model_names = ["Llama-3.2-3B-Instruct-bnb-4bit-DPO-All", 
+                           "Llama-3.2-3B-Instruct-bnb-4bit",
+                           "Llama-3.2-3B-Instruct-bnb-4bit-DPO-South-Asian",
+                           "Llama-3.2-3B-Instruct-bnb-4bit-DPO-Eastern-European",
+                           "Llama-3.2-3B-Instruct-bnb-4bit-DPO-African-Islamic",
+                           "Llama-3.2-3B-Instruct-bnb-4bit-DPO-Latin-American",
+                           "Llama-3.2-3B-Instruct-bnb-4bit-DPO-East-Asian",]
             markedness_paths = [f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_markedness_evaluation.json" for model_name in model_names]
             plot_continentwise_markedness(args.home_dir, markedness_paths, model_names, args.topic_list)
 

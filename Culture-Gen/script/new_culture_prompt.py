@@ -124,7 +124,7 @@ def prompting_pipeline(
     opinions = {}
     if mp == "moe":
         for region in regions:
-            opinion_path = save_path.replace("_moe", f"_DPO-{region}")
+            opinion_path = save_path.replace("_moe", f"-DPO-{region}_expert")
             with open(opinion_path, "r") as f:
                 opinion = json.load(f)
             opinions[region] = opinion
@@ -470,6 +470,9 @@ if __name__ == "__main__":
 
         if args.prompt:
             for region in args.regions:
+                if os.path.exists(f"{args.home_dir}/probable_data/categories_national_100_{base_model_name}-DPO-{region}_expert_prob=True.json") and not args.rewrite:
+                    continue
+
                 model_name = f"{base_model_name}-DPO-{region}"
                 model_path = f"reggans/{model_name}"
                 
