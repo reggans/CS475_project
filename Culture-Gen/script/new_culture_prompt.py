@@ -170,7 +170,7 @@ def prompting_pipeline(
                             outputs = model.generate(**inputs, do_sample=True, num_return_sequences=n_sample, max_new_tokens=100, top_p=1, top_k=50, pad_token_id=tokenizer.eos_token_id)
                         else:
                             if mp == "moe":
-                                outputs = []
+                                texts = []
                                 opinion_prompt = "Please respond with the help of the following passages. Make sure to reflect diverse values and perspectives.\n\n"
                                 for i in tqdm(range(n_sample//10), desc="Generating samples"):
                                     for region in regions:
@@ -179,12 +179,13 @@ def prompting_pipeline(
 
                                     prompt = opinion_prompt + prompt
                                     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-                                    outputs = torch.cat([outputs,
-                                                    model.generate(**inputs, do_sample=True, num_return_sequences=10, max_new_tokens=30, top_p=1, top_k=50, pad_token_id=tokenizer.eos_token_id)])
+                                    outputs = model.generate(**inputs, do_sample=True, num_return_sequences=10, max_new_tokens=30, top_p=1, top_k=50, pad_token_id=tokenizer.eos_token_id)
+                                    # decode the output
+                                    texts.extend(tokenizer.batch_decode(outputs, skip_special_tokens=True))
                             else:
                                 outputs = model.generate(**inputs, do_sample=True, num_return_sequences=n_sample//10, max_new_tokens=30, top_p=1, top_k=50, pad_token_id=tokenizer.eos_token_id)
-                        # decode the output
-                        texts = tokenizer.batch_decode(outputs, skip_special_tokens=True)
+                                # decode the output
+                                texts = tokenizer.batch_decode(outputs, skip_special_tokens=True)
                         
                         for text in texts:
                             text = text[len(prompt)+1:] # only save newly generated tokens
