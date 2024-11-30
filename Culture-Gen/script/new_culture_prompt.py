@@ -485,4 +485,4 @@ if __name__ == "__main__":
             prompt_and_save(args.home_dir, base_model_name, base_model_path, num_samples=args.num_samples, topic_list=args.topic_list, replace=args.overwrite, probably=args.probably, rewrite=args.rewrite, mp="moe", regions=args.regions)
         
         if args.shorten:
-            posthoc_shorten_answer(f"{args.home_dir}/probable_data/categories_nationality_{args.num_samples}_{base_model_name}_moe_prob={args.probably}.json", args.topic_list, rewrite=args.rewrite, model_name=base_model_name, batch=args.batch)
+            posthoc_shorten_answer(f"{args.home_dir}/probable_data/categories_nationality_{args.num_samples}_{base_model_name}_moe_prob={args.probably}.json", args.topic_list, rewrite=args.rewrite, model_name=base_model_name + "_moe", batch=args.batch)
