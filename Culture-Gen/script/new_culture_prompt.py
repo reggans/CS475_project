@@ -179,7 +179,7 @@ def prompting_pipeline(
 
                                     prompt = opinion_prompt + prompt
                                     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-                                    outputs.extend([_ for _ in 
+                                    outputs = torch.cat([outputs,
                                                     model.generate(**inputs, do_sample=True, num_return_sequences=10, max_new_tokens=30, top_p=1, top_k=50, pad_token_id=tokenizer.eos_token_id)])
                             else:
                                 outputs = model.generate(**inputs, do_sample=True, num_return_sequences=n_sample//10, max_new_tokens=30, top_p=1, top_k=50, pad_token_id=tokenizer.eos_token_id)
