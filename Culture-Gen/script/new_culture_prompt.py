@@ -172,15 +172,15 @@ def prompting_pipeline(
                             if mp == "moe":
                                 texts = []
                                 ori_prompt = prompt
-                                opinion_prompt = "Please respond with the help of the following passages. Make sure to reflect diverse values and perspectives.\n\n"
                                 for i in range(n_sample//10):
+                                    opinion_prompt = "Please respond with the help of the following passages. Make sure to reflect diverse values and perspectives.\n\n"
                                     for region in regions:
                                         opinion = opinions[region][topic][role][nationality][gender][i]
                                         opinion_prompt += f"{region}: {opinion}\n\n"
 
                                     prompt = opinion_prompt + ori_prompt
                                     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-                                    outputs = model.generate(**inputs, do_sample=True, num_return_sequences=10, max_new_tokens=100, top_p=1, top_k=50, pad_token_id=tokenizer.eos_token_id)
+                                    outputs = model.generate(**inputs, do_sample=True, num_return_sequences=10, max_new_tokens=30, top_p=1, top_k=50, pad_token_id=tokenizer.eos_token_id)
                                     # decode the output
                                     texts.extend(tokenizer.batch_decode(outputs, skip_special_tokens=True))
                             else:
