@@ -1277,7 +1277,8 @@ if __name__ == "__main__":
                            "Llama-3.2-3B-Instruct-bnb-4bit-DPO-Eastern-European",
                            "Llama-3.2-3B-Instruct-bnb-4bit-DPO-African-Islamic",
                            "Llama-3.2-3B-Instruct-bnb-4bit-DPO-Latin-American",
-                           "Llama-3.2-3B-Instruct-bnb-4bit-DPO-East-Asian",]
+                           "Llama-3.2-3B-Instruct-bnb-4bit-DPO-East-Asian",
+                           "Llama-3.2-3B-Instruct-bnb-4bit-moe",]
             markedness_paths = [f"{args.home_dir}/probable_data/categories_nationality_100_{model_name}_prob={args.probably}_markedness_evaluation.json" for model_name in model_names]
             plot_continentwise_markedness(args.home_dir, markedness_paths, model_names, args.topic_list)
 
