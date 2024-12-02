@@ -263,7 +263,7 @@ def precalculate_culture_symbol_nationality_prob(all_symbols_path,
         # load cache if exists
         # each topic has a separate cache file
         cache_path = all_symbols_path.replace(".json", f"_probability_cache_{topic}.pkl")
-        if os.path.exists(cache_path):
+        if os.path.exists(cache_path) and not rewrite:
             cache_dict = pkl.load(open(cache_path, "rb"))
         else:
             cache_dict = {}
