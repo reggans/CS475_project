@@ -232,7 +232,8 @@ def precalculate_culture_symbol_nationality_prob(all_symbols_path,
 
         baseline: culture-agnostic baseline, where no culture name is mentioned in the prompt
     """
-
+    if "moe" in model_path:
+        model_path = "unsloth/Llama-3.2-3B-Instruct-bnb-4bit"
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
