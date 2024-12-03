@@ -8,7 +8,7 @@ import argparse
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-from elasticsearch import Elasticsearch
+# from elasticsearch import Elasticsearch
 
 def get_nationality_count(home_dir, cache_path, es, index=None):
     """
