@@ -25,7 +25,7 @@ def extract_all_symbols_from_generation(home_dir, shortened_data_path, save_path
         reader = csv.reader(r)
         next(reader)
         countries_nationalities_list = [(row[0], row[1]) for row in reader]
-    logger.info("Loaded nationalities")
+    logger.info("Loaded nationalities:")
 
     # obtain data (..._shortened.json)
     with open(shortened_data_path, "r") as r:

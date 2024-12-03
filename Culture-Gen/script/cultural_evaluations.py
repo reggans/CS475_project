@@ -626,9 +626,12 @@ def eval_diversity(home_dir,
     # obtain data (..._shortened.json)
     with open(new_shortened_path, "r") as r:
         category_nationality_dict = json.load(r)
-    if os.path.exists(save_path) and not rewrite:
+    if os.path.exists(save_path):
         with open(save_path, "r") as r:
             symbol_counter_dict = json.load(r)
+        if rewrite:
+            for topic in symbol_counter_dict:
+                symbol_counter_dict[topic][gender] = {}
     else:
         symbol_counter_dict = {}
     if topic_list == None:
