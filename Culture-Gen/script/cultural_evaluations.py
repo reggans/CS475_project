@@ -297,7 +297,7 @@ def plot_bar_chart_with_markedness_by_topic(eval_paths, model_names, topic_list,
             average_markedness = sum([sum(d[1].values()) for d in ordered_tuples]) / len(ordered_tuples)
             model_data[model_names[i]].append(average_markedness)
     model_data["Topic"] = all_topic_list
-    print(model_data)
+    # print(model_data)
     df = pd.DataFrame(model_data)
     # Melt the dataframe to long format
     df_melted = pd.melt(df, id_vars='Topic', var_name='Model', value_name='Marked Generations')
@@ -691,7 +691,7 @@ def eval_diversity(home_dir,
                         probabilities = [cache_dict[ngram][nationality_index] for ngram in ngrams]
                         tups = list(zip(ngrams, probabilities))
                         tups = sorted(tups, key=lambda x: x[1], reverse=True)
-                        print(tups)
+                        # print(tups)
                     else:
                         continue
                     if tups is not None:
