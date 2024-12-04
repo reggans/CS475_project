@@ -330,10 +330,10 @@ def choose_keywords_for_cultures(generated_values,
         value = value_list[i]
         # if model_name == "mistral-7b":
             # mistral-7b needs calibration
-        probs = [(nationality, cache_dict[value][i] - baseline_cache_dict[""][i]) for i, nationality in enumerate(nationalities)]
+        # probs = [(nationality, cache_dict[value][i] - baseline_cache_dict[""][i]) for i, nationality in enumerate(nationalities)]
         # else:
         #     # llama2-13b
-        #     probs = [(nationality, cache_dict[value][i]) for i, nationality in enumerate(nationalities)]
+        probs = [(nationality, cache_dict[value][i]) for i, nationality in enumerate(nationalities)]
 
         probs = sorted(probs, key=lambda x: x[1], reverse=True)
         ns, ps = zip(*probs)

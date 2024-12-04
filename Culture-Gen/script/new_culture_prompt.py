@@ -173,7 +173,10 @@ def prompting_pipeline(
                                 texts = []
                                 ori_prompt = prompt
                                 for i in range(n_sample//10):
-                                    opinion_prompt = "Please respond with the help of the following passages. Make sure to reflect diverse values and perspectives.\n\n"
+                                    if nationality == "":
+                                        opinion_prompt = "Please respond with the help of the following passages. Make sure to reflect diverse values and perspectives.\n\n"
+                                    else:
+                                        opinion_prompt = f"Please respond with the help of the following passages. Use comments that best reflect {nationality} people.\n\n"
                                     for region in regions:
                                         opinion = opinions[region][topic][role][nationality][gender][i]
                                         opinion_prompt += f"{region}: {opinion}\n\n"
