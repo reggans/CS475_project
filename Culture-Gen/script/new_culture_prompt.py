@@ -174,7 +174,6 @@ def prompting_pipeline(
                                 generated.append(text)
                         else:
                             if mp == "moe":
-                                texts = []
                                 ori_prompt = prompt
                                 for i in range(n_sample):
                                     if nationality == "":
@@ -191,7 +190,7 @@ def prompting_pipeline(
                                     # decode the output
                                     batch_texts = tokenizer.batch_decode(outputs, skip_special_tokens=True)
                                     batch_texts = [text[len(prompt)+1:] for text in batch_texts]
-                                    texts.extend(batch_texts)
+                                    generated.extend(batch_texts)
                             else:
                                 outputs = model.generate(**inputs, do_sample=True, num_return_sequences=n_sample, max_new_tokens=30, top_p=1, top_k=50, pad_token_id=tokenizer.eos_token_id)
                                 # decode the output
