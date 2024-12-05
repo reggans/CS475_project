@@ -401,7 +401,7 @@ def eval_skewness(home_dir,
             strength_skewness_dict = json.load(r)
         if rewrite:
             for topic in strength_skewness_dict:
-                strength_skewness_dict[topic][gender] = {}
+                strength_skewness_dict[topic].pop(gender, None)
     else:
         strength_skewness_dict = {}
 
