@@ -168,6 +168,10 @@ def prompting_pipeline(
                         inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
                         if chat:
                             outputs = model.generate(**inputs, do_sample=True, num_return_sequences=n_sample, max_new_tokens=100, top_p=1, top_k=50, pad_token_id=tokenizer.eos_token_id)
+                            # decode the output
+                            for text in texts:
+                                text = text[len(prompt)+1:] # only save newly generated tokens
+                                generated.append(text)
                         else:
                             if mp == "moe":
                                 texts = []
@@ -185,15 +189,17 @@ def prompting_pipeline(
                                     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
                                     outputs = model.generate(**inputs, do_sample=True, num_return_sequences=1, max_new_tokens=30, top_p=1, top_k=50, pad_token_id=tokenizer.eos_token_id)
                                     # decode the output
-                                    texts.extend(tokenizer.batch_decode(outputs, skip_special_tokens=True))
+                                    batch_texts = tokenizer.batch_decode(outputs, skip_special_tokens=True)
+                                    batch_texts = [text[len(prompt)+1:] for text in batch_texts]
+                                    texts.extend(batch_texts)
                             else:
                                 outputs = model.generate(**inputs, do_sample=True, num_return_sequences=n_sample, max_new_tokens=30, top_p=1, top_k=50, pad_token_id=tokenizer.eos_token_id)
                                 # decode the output
                                 texts = tokenizer.batch_decode(outputs, skip_special_tokens=True)
                         
-                        for text in texts:
-                            text = text[len(prompt)+1:] # only save newly generated tokens
-                            generated.append(text)
+                                for text in texts:
+                                    text = text[len(prompt)+1:] # only save newly generated tokens
+                                    generated.append(text)
                     sampled_generations = '\n'.join(random.sample(generated, 5))
                     print(f"Example generations: {sampled_generations}")
                     topic_nationality_dict[topic][role][nationality][gender] = generated
